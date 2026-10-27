@@ -26,7 +26,8 @@ The page loads KaTeX (math), the MQTT client and a QR generator from the jsDeliv
 
    The lobby shows a one-line summary (e.g. "8 questions · random draw from L2, L3"). The setup is remembered by the browser. → **Start quiz**. You can also change the selection mid-session from the question list (`L` → *Change questions…*); answers already collected are kept.
 3. Each question: students answer (the header counts *answered / online*) → press **Space** (or *Reveal answer*) to show the solution and the correct/wrong tally → **Space** again for the next question.
-4. The room code is remembered by the browser, so the same QR code can stay on your slides for the whole semester. *New room code* creates a fresh one.
+4. **End session ■** (bottom bar) returns to the start page with the QR code. Collected answers are kept (CSV download in the question list); the next session starts again from the first question, and a random selection is drawn anew.
+5. The room code is remembered by the browser, so the same QR code can stay on your slides for the whole semester. *New room code* creates a fresh one.
 
 Keyboard shortcuts (presenter): `Space`/`→` next step, `←` back, `R` reveal, `E` show/hide explanation, `L` question list (jump to any question, download results as CSV), `Q` big QR code, `F` fullscreen.
 If you reload the presenter page, the session (position and collected answers) is restored and students reconnect automatically. Keep the presenter tab open during the lecture.

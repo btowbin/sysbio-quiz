@@ -776,7 +776,7 @@ const QUESTIONS = [
 /* ====================================================================
    SETTINGS  (edit here)
    ==================================================================== */
-const BUILD        = '2026-10-27 19:52';                // version stamp (shown at the bottom of the pages)
+const BUILD        = '2026-10-27 19:57';                // version stamp (shown at the bottom of the pages)
 const TITLE        = 'Systems Biology';          // shown in the header
 // LIVE MODE TRANSPORT: messages travel through free public MQTT brokers (MQTT over secure WebSocket, no account needed).
 // The presenter page connects to ALL brokers in the list; each student uses the first one that works.
@@ -1099,8 +1099,8 @@ function studentConnect(){
   const t1=setTimeout(fail,9000);
   cl.on('connect',()=>{
     if(S!==me||me.cl!==cl) return; first=true; me.everConnected=true; clearTimeout(t1); cl.options.reconnectPeriod=2000;
-    cl.subscribe([topic(me.code,'state'),topic(me.code,'host'),topic(me.code,'s/'+me.sid)],{qos:1});
-    studentHello(); studentUpd(); studentPaint();
+    cl.subscribe([topic(me.code,'state'),topic(me.code,'host'),topic(me.code,'s/'+me.sid)],{qos:1},()=>{ if(S===me) studentHello(); });   // hello only after the subscription is active
+    studentUpd(); studentPaint();
     clearTimeout(me.hostT);
     me.hostT=setTimeout(()=>{ if(S===me && me.hostOn!==true){ me.err='Step 2: connected to the message service, but the lecturer’s page for room “'+me.code+'” is not online. Check the code, or wait until the lecturer opens the page.'; studentPaint(); } },6000);
   });
@@ -1343,6 +1343,12 @@ Object.assign(ACTS,{
   htopick(){ H.cfg.picks=H.plan.slice(); H.cfg.mode='pick'; planChanged(false); },
   hsetupdone(){ H.ui.overlay=null; hostPaint(); },
   hlobby(){ H.ui.overlay=null; setPhase('lobby'); },
+  hend(){
+    if(!confirm('End this session and return to the start page?\n\nCollected answers are kept (Questions → Download results). The next session starts from the first question; a random selection is drawn anew.')) return;
+    H.ui.overlay=null; H.ui.exp=false; H.cur=null;
+    if(H.cfg.mode==='random') buildPlan(true);
+    setPhase('lobby'); window.scrollTo(0,0);
+  },
   hnewroom(){ if(!confirm('Create a new room code? Students currently connected will have to rejoin, and collected answers are cleared.')) return; hostClose(true); H.code=genCode(); H.answers={}; H.pres.clear(); H.cur=null; H.phase='lobby'; hostSave(); hostConnect(); hostPaint(); },
   hreset(){ if(!confirm('Clear all collected answers of this session?')) return; H.answers={}; H.rv=(H.rv||1)+1; hostSave(); broadcast(); hostPaint(); },
   hcsv(){ hostCSV(); },
@@ -1390,6 +1396,7 @@ function hostPaint(){
       '<button class="btn" data-act="hprev" title="← Back">◀</button>'+
       '<button class="btn primary" data-act="hnext" title="Space / →">'+(rev?(idx<list.length?'Next question ▶':'Finish'):'Reveal answer')+'</button>'+
       (rev?'<button class="btn" data-act="hexp" title="E">'+(H.ui.exp?'Hide':'Show')+' explanation</button>':'')+
+      '<button class="btn" data-act="hend" title="End this session and return to the start page (QR code)">End session ■</button>'+
       '<button class="btn" data-act="hlist" title="L">Questions</button><button class="btn" data-act="hqr" title="Q">QR code</button><button class="btn" data-act="hfull" title="F">⛶</button><button class="btn ghost" data-act="theme" aria-label="Toggle theme">'+THEME_ICON+'</button></div></div>';
   }
   // overlays

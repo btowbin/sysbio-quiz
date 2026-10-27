@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Systems Biology Quiz</title>
+<meta name="description" content="Exam-style multiple-choice questions for the Systems Biology lecture: self-test or live in the lecture.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b6e99'/%3E%3Cpath d='M8 44 C20 44 20 18 32 18 S44 44 56 44' fill='none' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --ink:#14202b; --muted:#5b6b7a; --line:#dde3e9;
+  --accent:#0b6e99; --accent-ink:#ffffff; --accent-soft:#e3f1f7;
+  --ok:#17874f; --ok-soft:#dff3e7; --bad:#c2372f; --bad-soft:#fae3e1; --warn:#a8680b;
+  --c-ink:#14202b; --c-a:#d55e00; --c-b:#0072b2; --c-c:#009e73; --c-d:#cc79a7;
+  --shadow:0 1px 2px rgba(20,32,43,.06),0 6px 24px rgba(20,32,43,.06);
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e151d; --card:#16202b; --ink:#e8eef4; --muted:#94a5b5; --line:#263444;
+    --accent:#4cc2e8; --accent-ink:#06222d; --accent-soft:#12303d;
+    --ok:#4cc88a; --ok-soft:#133a28; --bad:#f08178; --bad-soft:#40201e; --warn:#e3a851;
+    --c-ink:#e8eef4; --c-a:#ff9a4d; --c-b:#56b4e9; --c-c:#2fd1a2; --c-d:#e69cc4;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e151d; --card:#16202b; --ink:#e8eef4; --muted:#94a5b5; --line:#263444;
+  --accent:#4cc2e8; --accent-ink:#06222d; --accent-soft:#12303d;
+  --ok:#4cc88a; --ok-soft:#133a28; --bad:#f08178; --bad-soft:#40201e; --warn:#e3a851;
+  --c-ink:#e8eef4; --c-a:#ff9a4d; --c-b:#56b4e9; --c-c:#2fd1a2; --c-d:#e69cc4;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;min-height:100vh}
+h1,h2,h3{line-height:1.2;margin:0}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px 64px}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+.grow{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px}
+.stack>*+*{margin-top:16px}
+.grid2{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+
+/* buttons */
+.btn{appearance:none;border:1px solid var(--line);background:var(--card);padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:600;transition:transform .05s,background .15s,border-color .15s}
+.btn:hover{border-color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent}
+.btn.big{padding:14px 22px;font-size:1.05rem;border-radius:12px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;font:inherit}
+
+/* header */
+.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.status{white-space:nowrap}
+@media (max-width:520px){.top.compact .bt{display:none}}
+.brand{white-space:nowrap;font-weight:800;letter-spacing:-.01em;font-size:1.15rem;display:flex;gap:10px;align-items:center;cursor:pointer}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
+.logo svg{width:20px;height:20px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:700}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block}
+.dot.on{background:var(--ok)} .dot.wait{background:var(--warn)} .dot.off{background:var(--bad)}
+
+/* home */
+.hero{margin:12px 0 28px}
+.hero h1{font-size:clamp(1.8rem,5vw,2.6rem);letter-spacing:-.02em}
+.hero p{font-size:1.1rem;color:var(--muted);max-width:56ch;margin:10px 0 0}
+.choice h2{font-size:1.25rem;margin-bottom:6px}
+.choice p{margin:0 0 16px;color:var(--muted)}
+.codein{font:700 1.4rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.25em;text-transform:uppercase;text-align:center;width:9.5em;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+.codein:focus{outline:2px solid var(--accent);border-color:transparent}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;min-width:150px;flex:1 1 220px;transition:border-color .15s,background .15s}
+.chip b{display:block}
+.chip span{font-size:.82rem;color:var(--muted)}
+.chip.on{border-color:var(--accent);background:var(--accent-soft)}
+.chip.on b{color:var(--accent)}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--ok)}
+
+/* question */
+.qmeta{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px}
+.qtext{font-size:1.15rem;line-height:1.5}
+.qtext p{margin:0 0 .6em}
+.fig{margin:16px auto 4px;max-width:520px}
+.fig svg{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:10px}
+.opts{display:grid;gap:10px;margin:18px 0 0}
+.opt{position:relative;overflow:hidden;display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--card);cursor:pointer;line-height:1.45;transition:border-color .12s,background .12s}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt .k{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--bg);font-weight:800;font-size:.9rem;border:1px solid var(--line)}
+.opt .t{flex:1;min-width:0;overflow-wrap:anywhere;position:relative}
+.opt .cnt{flex:none;font-weight:700;font-variant-numeric:tabular-nums;position:relative}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.sel .k{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+.opt.ok .k{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+.opt.bad .k{background:var(--bad);color:#fff;border-color:var(--bad)}
+.opt.dim{opacity:.62}
+.opt[disabled]{cursor:default}
+.opt.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--pct,0%);background:var(--barc,var(--accent));opacity:.22;transition:width .5s}
+.opt.ok.stat{--barc:var(--ok)} .opt.bad.stat{--barc:var(--bad)}
+.feedback{margin-top:16px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback h3{font-size:1.05rem;margin-bottom:6px}
+.src{font-size:.8rem;color:var(--muted);margin-top:8px}
+table.tbl{border-collapse:collapse;margin:10px 0 0;font-size:.85em;max-width:100%}
+table.tbl th,table.tbl td{border:1px solid var(--line);padding:4px 8px;text-align:center}
+table.tbl th:first-child{text-align:left;font-weight:600;background:var(--bg)}
+.progress{height:8px;background:var(--line);border-radius:8px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.big-score{font-size:3.2rem;font-weight:800;letter-spacing:-.02em}
+.list{display:grid;gap:8px}
+.li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.li .m{flex:none;width:22px;text-align:center;font-weight:800}
+.li.ok .m{color:var(--ok)} .li.bad .m{color:var(--bad)}
+.field{display:flex;align-items:center;gap:8px}
+select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
+.toggle{display:flex;gap:10px;align-items:center;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+
+/* figure colours */
+.fig svg text{fill:var(--c-ink);font:13px system-ui,sans-serif}
+.fig svg .ax{stroke:var(--c-ink);stroke-width:1.4;fill:none}
+.fig svg .grid{stroke:var(--line);stroke-width:1}
+.fig svg .lab{paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round;font-weight:700;font-size:14px}
+
+/* student live */
+.live{max-width:640px}
+.status{font-size:.82rem;color:var(--muted);display:flex;gap:6px;align-items:center}
+.wait{text-align:center;padding:48px 12px}
+.wait .spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--accent);margin:0 auto 16px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.banner{background:var(--bad-soft);border:1px solid var(--bad);color:var(--bad);padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:600}
+.banner.warn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+/* presenter */
+.proj{min-height:100vh;display:flex;flex-direction:column}
+.ph{display:flex;align-items:center;gap:16px;padding:12px 28px;font-size:clamp(14px,1.35vw,22px);border-bottom:1px solid var(--line);background:var(--card)}
+.ph .lec{font-weight:700}
+.ph .sp{flex:1}
+.pm{flex:1;display:grid;gap:32px;padding:18px 28px 16px;align-content:start;grid-template-columns:1fr}
+.pm.hasfig{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+@media (max-width:900px){.pm.hasfig{grid-template-columns:1fr}}
+.pm .qtext{font-size:clamp(20px,2.3vw,42px);line-height:1.35}
+.pm .opts{gap:clamp(8px,1vw,16px)}
+.pm .opt{font-size:clamp(16px,1.85vw,34px);padding:clamp(6px,.8vw,16px) clamp(12px,1.4vw,24px);cursor:default;border-width:3px}
+.pm .opt .k{width:1.5em;height:1.5em;font-size:.8em;border-radius:.4em}
+.pm .fig{max-width:none;margin-top:0;position:sticky;top:16px}
+.pm .feedback{font-size:clamp(16px,1.6vw,28px)}
+.pf{position:sticky;bottom:0;z-index:5;display:flex;gap:10px;align-items:center;padding:10px 28px;border-top:1px solid var(--line);background:var(--card);flex-wrap:wrap}
+.pf .info{font-size:.85rem;color:var(--muted);margin-right:auto}
+.pf .info b{color:var(--ink)}
+.tally{display:flex;gap:clamp(10px,1.6vw,28px);flex-wrap:wrap;margin:clamp(12px,1.6vw,24px) 0 0;font-size:clamp(16px,1.9vw,32px);font-weight:700}
+.tally .ok{color:var(--ok)} .tally .bad{color:var(--bad)} .tally .no{color:var(--muted)}
+.overlay{position:fixed;inset:0;background:rgba(8,14,20,.72);display:grid;place-items:center;z-index:50;padding:16px}
+.modal{background:var(--card);border-radius:18px;padding:26px;max-width:min(92vw,980px);max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.qrbox{background:#fff;padding:14px;border-radius:14px;display:inline-block;line-height:0}
+.qrbox svg{width:min(60vh,70vw,520px);height:auto}
+.code{font:800 clamp(28px,4vw,56px)/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2em}
+.lobby{display:grid;grid-template-columns:auto 1fr;gap:40px;align-items:center;padding:28px;flex:1}
+@media (max-width:820px){.lobby{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.lobby .qrbox svg{width:min(42vh,80vw,420px)}
+.joinurl{font:600 clamp(14px,1.4vw,22px) ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;color:var(--accent)}
+.bigcount{font-size:clamp(28px,3.4vw,56px);font-weight:800}
+.qlist{display:grid;gap:6px;min-width:min(86vw,640px)}
+.qli{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--card);text-align:left}
+.qli:hover{border-color:var(--accent)}
+.qli.cur{border-color:var(--accent);background:var(--accent-soft)}
+.qli .id{font:700 .8rem ui-monospace,Menlo,monospace;color:var(--muted);flex:none;width:4.2em}
+.qli .tp{flex:1}
+.qli .st{flex:none;font-size:.82rem;color:var(--muted)}
+.hide-cursor{cursor:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript><div class="wrap">This quiz needs JavaScript.</div></noscript>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+
+<script>
+/* =====================================================================
+   QUESTION BANK
+   ---------------------------------------------------------------------
+   Each question is one object:
+     id     unique, never reuse (progress + live sessions refer to it)
+     lec    lecture number 1-6  (7 = "More exam topics")
+     topic  short label shown above the question
+     q      question text. $...$ = inline LaTeX, $$...$$ = display LaTeX. HTML allowed.
+     opts   answer options.  *** THE FIRST OPTION IS THE CORRECT ONE ***
+            (the app shuffles them for display; same order for everybody in live mode)
+            Use  ans:<index>  + fixed:true  to keep your own order instead.
+     exp    explanation shown after the answer is revealed
+     src    optional: where the question is modelled on
+     fig    optional: figure spec (see plot() further down)
+   ===================================================================== */
+const r = String.raw;
+
+// helper: reproduction table (days 1-7) for the "early vs late reproduction" questions
+const tbl = (A, B) => '<table class="tbl"><tr><th>Day after birth</th>' + [1,2,3,4,5,6,7].map(d => '<th>' + d + '</th>').join('') +
+  '</tr><tr><th>Progeny / day, strain A</th>' + A.map(v => '<td>' + v + '</td>').join('') +
+  '</tr><tr><th>Progeny / day, strain B</th>' + B.map(v => '<td>' + v + '</td>').join('') + '</tr></table>';
+
+const LECTURES = {
+  1: 'Simple regulation',
+  2: 'Autoregulation & Hill function',
+  3: 'Feed-forward loops',
+  4: 'Two-dimensional systems',
+  5: 'Optimality & growth',
+  6: 'Noise & robustness',
+  7: 'More exam topics'
+};
+
+const QUESTIONS = [
+
+/* ============================ LECTURE 1 ============================ */
+{ id:'L1-01', lec:1, topic:'Response time', src:'Exam HS22–24 · Q1b/c',
+  q:r`Simple regulation is described by $\dot y=\beta-\alpha y$. After an ON switch from $y=0$, the production rate $\beta$ is <b>doubled</b>. How do the steady state and the response time (time to reach half of the steady state) change?`,
+  opts:[r`Steady state doubles, response time is unchanged`, r`Steady state doubles, response time is halved`, r`Steady state is unchanged, response time is halved`, r`Steady state doubles, response time doubles`],
+  exp:r`$y_{st}=\beta/\alpha$ doubles, but $t_{1/2}=\ln 2/\alpha$ does not contain $\beta$. A higher production rate raises the plateau and the initial speed by the same factor, so the halfway point is reached at the same time.` },
+
+{ id:'L1-02', lec:1, topic:'Steady state & response time',
+  q:r`A protein is produced at $\beta=6\ \mu\mathrm{M/h}$ and removed with $\alpha=2\ \mathrm{h^{-1}}$ (ON switch from zero). What are its steady state and response time?`,
+  opts:[r`$y_{st}=3\ \mu$M and $t_{1/2}=\ln 2/2\approx 0.35$ h`, r`$y_{st}=3\ \mu$M and $t_{1/2}=2\ln 2\approx 1.4$ h`, r`$y_{st}=12\ \mu$M and $t_{1/2}\approx 0.35$ h`, r`$y_{st}=12\ \mu$M and $t_{1/2}\approx 1.4$ h`],
+  exp:r`$y_{st}=\beta/\alpha=6/2=3\ \mu$M and $t_{1/2}=\ln2/\alpha=0.69/2\approx0.35$ h.` },
+
+{ id:'L1-03', lec:1, topic:'Faster response, same steady state', src:'Exam HS21–24 · Q1d',
+  q:r`You want a gene under simple regulation to respond <b>twice as fast</b> (half the response time) <b>without changing its steady state</b>. What must you change?`,
+  opts:[r`Double $\alpha$ <i>and</i> double $\beta$`, r`Double $\beta$ only`, r`Double $\alpha$ only`, r`Halve $\alpha$ and double $\beta$`],
+  exp:r`$t_{1/2}=\ln2/\alpha$ needs $\alpha\to2\alpha$. To keep $y_{st}=\beta/\alpha$ constant, $\beta$ must double as well. This is costly: the cell has to produce <i>and</i> destroy the protein twice as fast.` },
+
+{ id:'L1-04', lec:1, topic:'Dilution as removal',
+  q:r`A completely stable protein (no degradation at all) is expressed in bacteria that divide every 60 minutes. After an ON switch, how long does it take to reach half of its new steady state?`,
+  opts:[r`About 60 min (one doubling time)`, r`About 30 min`, r`About 90 min`, r`It never reaches a steady state, because it is not degraded`],
+  exp:r`Growth dilutes the protein, so $\alpha=\ln2/T_{double}$ even without degradation. Then $t_{1/2}=\ln2/\alpha=T_{double}$. This is why the cell-division time is the lower limit for the removal rate of most proteins.` },
+
+{ id:'L1-05', lec:1, topic:'OFF switch',
+  q:r`Two genes with the same removal rate $\alpha$ are switched OFF at $t=0$. Gene 1 was expressed at 10 µM, gene 2 at 1 µM. Which gene needs longer to fall to half of its initial level?`,
+  opts:[r`Both need the same time, $\ln2/\alpha$`, r`Gene 1 (higher level)`, r`Gene 2 (lower level)`, r`This cannot be said without knowing $\beta$`],
+  exp:r`$y(t)=y_0e^{-\alpha t}$: half of $y_0$ is reached at $t=\ln2/\alpha$ whatever $y_0$ is. The response time of an OFF switch is independent of the initial expression level.` },
+
+{ id:'L1-06', lec:1, topic:'Separation of timescales',
+  q:r`The model $\dot y=\beta-\alpha y$ assumes that protein production starts immediately when the gene is activated. Why is this often a good approximation?`,
+  opts:[r`mRNA production and the other intermediate steps are fast compared with the slow accumulation of the protein, which is governed by $\alpha$`, r`mRNA is never degraded`, r`Transcription and translation happen at the very same instant`, r`The model contains only one parameter`],
+  exp:r`Separation of timescales: if the mRNA half-life is much shorter than the protein half-life, the mRNA reaches its steady state quickly and can be neglected. For unstable proteins or very stable mRNAs the assumption can fail (Assignment 1, Q4).` },
+
+{ id:'L1-07', lec:1, topic:'Change of production rate', src:'Assignment 1 · Q1',
+  q:r`Protein X is produced at $\beta_1=1\ \mu$mol/h and removed with $\alpha=1\ \mathrm{h^{-1}}$. At $t=0$ production switches to $\beta_2=2\ \mu$mol/h. How long does X need to reach the point <b>half-way</b> between old and new steady state?`,
+  opts:[r`$\ln2\approx0.69$ h`, r`1 h`, r`$\ln2/2\approx0.35$ h`, r`1.5 h`],
+  exp:r`Old steady state 1, new 2, so half-way is 1.5 µmol. With $x(t)=2-e^{-t}$ we get $e^{-t}=1/2$, so $t=\ln2/\alpha$ — again independent of the production rates.` },
+
+{ id:'L1-08', lec:1, topic:'How many response times?',
+  q:r`After an ON switch in simple regulation, which fraction of the final steady state has been reached after <b>three response times</b> ($t=3\,t_{1/2}$)?`,
+  opts:[r`87.5 %`, r`75 %`, r`93.75 %`, r`100 %`],
+  exp:r`$y/y_{st}=1-e^{-\alpha t}=1-2^{-t/t_{1/2}}=1-2^{-3}=87.5\,\%$. Each additional response time halves the remaining distance.` },
+
+{ id:'L1-09', lec:1, topic:'Reading the curves',
+  q:r`The dashed curve is the ON switch of a gene with $\alpha=1$ and $\beta=1$. Which solid curve is obtained when <b>both</b> $\alpha$ and $\beta$ are doubled?`,
+  fig:{ x:[0,6], y:[0,2.3], xl:'time', yl:'protein y', hlines:[],
+    curves:[ {fn:'1-exp(-x)', c:'ink', dash:true},
+             {fn:'2*(1-exp(-x))', c:'a', lab:'1', labx:5.6},
+             {fn:'1-exp(-2*x)', c:'b', lab:'2', labx:2.6},
+             {fn:'2*(1-exp(-0.5*x))', c:'c', lab:'3', labx:5.6} ] },
+  opts:[r`Curve 2`, r`Curve 1`, r`Curve 3`, r`None — the curve does not change`],
+  exp:r`Doubling both keeps $y_{st}=\beta/\alpha=1$ but halves $t_{1/2}$ (curve 2: same plateau, faster). Curve 1 is $\beta\times2$ only (plateau doubles, same response time); curve 3 is $\alpha$ halved and $\beta$ unchanged: higher and slower.` },
+
+{ id:'L1-10', lec:1, topic:'Initial speed vs. stability',
+  q:r`Proteins P and Q are produced at the same rate $\beta$, but Q is twice as stable ($\alpha_Q=\alpha_P/2$). Both are switched ON from zero. Which statement is correct?`,
+  opts:[r`Both initially accumulate equally fast ($\dot y(0)=\beta$), but Q reaches a twice higher steady state, more slowly`, r`Q accumulates faster at the beginning because it is more stable`, r`P accumulates faster at the beginning and reaches the higher steady state`, r`Both reach the same steady state but Q needs twice as long`],
+  exp:r`At $t=0$ nothing is yet removed, so $\dot y(0)=\beta$ for both. Later removal matters: $y_{st}=\beta/\alpha$ is twice as high for Q and its response time $\ln2/\alpha$ twice as long.` },
+
+
+/* ============================ LECTURE 2 ============================ */
+{ id:'L2-01', lec:2, topic:'Hill function', src:'Exam HS21–23 · Q3a',
+  q:r`In the Hill model $\rho=\dfrac{(x/K)^n}{1+(x/K)^n}$, what fraction of the promoters is bound when $x=K$?`,
+  opts:[r`50 %, independent of $n$`, r`50 %, but only for $n=1$`, r`100 % if $n>1$`, r`$K/(1+K)$`],
+  exp:r`$\rho(K)=1^n/(1+1^n)=1/2$ for every $n$. $K$ is the concentration at which half of the promoters are bound; $n$ only changes the steepness.` },
+
+{ id:'L2-02', lec:2, topic:'Hill coefficient',
+  q:r`The figure shows binding curves $\rho(x)$ for three Hill coefficients ($n=1$, $n=2$, $n=10$). Which curve has the strongest cooperativity?`,
+  fig:{ x:[0,4], y:[0,1.08], xl:'concentration x', yl:'bound fraction ρ',
+    xticks:[[1,'K']], yticks:[[0.5,'0.5'],[1,'1']], vlines:[{x:1,dash:true}], hlines:[{y:0.5,dash:true}],
+    curves:[ {fn:'x**2/(1+x**2)', c:'a', lab:'1', labx:3.2},
+             {fn:'x/(1+x)', c:'b', lab:'2', labx:3.4},
+             {fn:'x**10/(1+x**10)', c:'c', lab:'3', labx:1.35} ] },
+  opts:[r`Curve 3`, r`Curve 1`, r`Curve 2`, r`All three — they cross at $x=K$`],
+  exp:r`A higher Hill coefficient gives a steeper, more switch-like (sigmoidal) curve that approaches a step function at $x=K$. Curve 3 is $n=10$, curve 1 is $n=2$ and curve 2 is $n=1$. All curves pass through $(K,0.5)$, which says nothing about $n$.` },
+
+{ id:'L2-03', lec:2, topic:'Cooperative binding',
+  q:r`How can a Hill coefficient $n\ge2$ arise biologically for a transcription factor acting on a promoter?`,
+  opts:[r`Several binding sites for the TF in the promoter (or TF multimers) whose binding events stabilise each other`, r`The TF binds extremely tightly (very small $K$)`, r`The TF is degraded very quickly`, r`The promoter has a single binding site that is always occupied`],
+  exp:r`Cooperative binding — e.g. multiple binding sites in the same promoter — makes the binding curve sigmoidal ($n>1$).`,
+  src:'Exam HS22 · Q3c' },
+
+{ id:'L2-04', lec:2, topic:'Activator vs. repressor', src:'Exam HS22/23 · Q3',
+  q:r`A gene is regulated by a transcription factor $Y$ acting as a <b>repressor</b> (maximal rate $\beta$, Hill function with $K$, $n$). Which expression gives its transcription rate?`,
+  opts:[r`$\beta\,\dfrac{K^n}{Y^n+K^n}$`, r`$\beta\,\dfrac{Y^n}{Y^n+K^n}$`, r`$\beta\,(1+\rho)$`, r`$\beta\,\rho^{\,n}$`],
+  exp:r`The simplest model: a promoter is active whenever it is <i>un</i>bound. Transcription $=\beta(1-\rho)=\beta K^n/(Y^n+K^n)$. For an activator the activity is $\beta\rho$. The binding function $\rho$ itself is the same.` },
+
+{ id:'L2-05', lec:2, topic:'Negative autoregulation: steady state', src:'Assignment 2 · Q1a',
+  q:r`A protein X represses its own production: $f(X)=\beta$ for $X \lt K$ and $0$ for $X\ge K$, with $\dot X=f(X)-\alpha X$, $\alpha=1/$h, $\beta=500\ \mu$mol/h, $K=1\ \mu$mol. What is the steady state of X?`,
+  opts:[r`About 1 µmol ($\approx K$)`, r`500 µmol ($=\beta/\alpha$)`, r`250 µmol`, r`0.5 µmol`],
+  exp:r`Production stops as soon as $X$ reaches $K$, so the level fluctuates around $K$. The steady state is set by $K$ and is independent of $\beta$ and $\alpha$ (as long as $\beta/\alpha\gg K$).` },
+
+{ id:'L2-06', lec:2, topic:'Negative autoregulation: response time', src:'Assignment 2 · Q1b',
+  q:r`Same system as before ($\beta=500\ \mu$mol/h, $K=1\ \mu$mol, $\alpha=1/$h). Starting from $X=0$, how long until X is at half of its steady state? (Neglect degradation during the initial accumulation.)`,
+  opts:[r`$\approx0.001$ h ($\approx3.6$ s)`, r`$\approx0.69$ h`, r`$\approx0.5$ h`, r`$\approx0.002$ h ($\approx7$ s)`],
+  exp:r`X rises linearly with slope $\beta$ until $K$: $t_{1/2}\approx (K/2)/\beta=0.5/500=0.001$ h. It depends on $\beta$ and $K$ and (for large $\beta/\alpha$) not on $\alpha$.` },
+
+{ id:'L2-07', lec:2, topic:'Negative autoregulation vs. simple regulation', src:'Assignment 2 · Q1d,e',
+  q:r`A protein Y <i>without</i> autoregulation reaches the same steady state (1 µmol) as X from the previous questions, with the same $\alpha=1/$h. Roughly how much faster is the negatively autoregulated X in an ON switch?`,
+  opts:[r`About 700-fold`, r`About 2-fold`, r`About 10-fold`, r`Equally fast`],
+  exp:r`Y needs $\beta_s=\alpha K=1\ \mu$mol/h, so $t_{1/2}=\ln2/\alpha=0.69$ h. X needs 0.001 h. The ratio is $\approx 690$. Negative autoregulation lets the cell use a huge production rate without overshooting.` },
+
+{ id:'L2-08', lec:2, topic:'Negative autoregulation: OFF switch',
+  q:r`Does negative autoregulation also accelerate the <b>OFF</b> switch compared with simple regulation?`,
+  opts:[r`No — once production stops, the decline is governed by $\alpha$ alone, as in simple regulation`, r`Yes — the feedback pushes the level down faster`, r`Yes, but only if $n>1$`, r`No — it makes the OFF switch slower`],
+  exp:r`NAR accelerates the ON switch only. After the OFF switch there is no production, and the protein decays with the same $\alpha$ as in simple regulation.` },
+
+{ id:'L2-09', lec:2, topic:'Robustness of negative autoregulation',
+  q:r`Why is the steady state of a negatively autoregulated gene robust to changes in the removal rate $\alpha$?`,
+  opts:[r`The production curve is very steep around the fixpoint, so changing the slope of the removal line barely shifts the intersection`, r`$\alpha$ cancels out of the equation $\dot y=\beta f(y)-\alpha y$`, r`Negative autoregulation removes protein degradation`, r`Because the Hill coefficient is always 1`],
+  exp:r`In the graphical analysis the fixpoint is where production and removal curves cross. If the production curve falls steeply there, tilting the removal line (changing $\alpha$) hardly changes the crossing point.` },
+
+{ id:'L2-10', lec:2, topic:'Positive autoregulation (n = 1)',
+  q:r`A gene with positive autoregulation ($n=1$) and a simple-regulation gene have the same steady state and removal rate. How does the positively autoregulated gene respond to an ON switch?`,
+  opts:[r`Slower — production minus removal is smaller everywhere`, r`Faster — the feedback amplifies production`, r`Equally fast`, r`Faster, but only in the OFF switch`],
+  exp:r`In the production/removal plot, the distance between the two curves (the net rate of change) is always smaller for PAR with $n=1$. PAR slows the response (for ON and for OFF).` },
+
+{ id:'L2-11', lec:2, topic:'Flow on the line', src:'Exam HS21–23 · Q2a,b',
+  q:r`$\dot y=\beta_0+\beta\frac{(y/K)^n}{1+(y/K)^n}-\alpha y$ (here $n=4$) describes positive autoregulation with basal production $\beta_0$. The graph shows production (green) and removal (red). How many fixpoints are there, and how many of them are stable?`,
+  fig:{ x:[0,5], y:[0,4.8], xl:'y', yl:'rate',
+    curves:[ {fn:'0.3+4*x**4/(16+x**4)', c:'c', lab:'production', labx:4.0, laby:-0.55}, {fn:'1.05*x', c:'b', lab:'removal', labx:4.4, laby:0.3} ],
+    pts:[ {x:0.2873,y:0.3017,lab:'1',fill:'n'}, {x:1.8049,y:1.8952,lab:'2',fill:'n'}, {x:3.8321,y:4.0237,lab:'3',fill:'n'} ] },
+  opts:[r`3 fixpoints, 2 stable`, r`3 fixpoints, 1 stable`, r`3 fixpoints, all stable`, r`1 fixpoint, stable`],
+  exp:r`Where production exceeds removal, $y$ increases; where removal exceeds production, $y$ decreases. Fixpoints 1 and 3 attract (stable), fixpoint 2 repels (unstable). The system is bistable.` },
+
+{ id:'L2-12', lec:2, topic:'Bistability and hysteresis', src:'Exam HS21–23 · Q2c,d',
+  q:r`Same system as in the previous question (fixpoints 1, 2, 3). A cell starts at $y=0$ and settles. Then $\beta_0$ is increased 100-fold for a short time (a bifurcation) and afterwards set back to its original value. Where is the system now?`,
+  fig:{ x:[0,5], y:[0,4.8], xl:'y', yl:'rate',
+    curves:[ {fn:'0.3+4*x**4/(16+x**4)', c:'c'}, {fn:'1.05*x', c:'b'} ],
+    pts:[ {x:0.2873,y:0.3017,lab:'1',fill:'n'}, {x:1.8049,y:1.8952,lab:'2',fill:'n'}, {x:3.8321,y:4.0237,lab:'3',fill:'n'} ] },
+  opts:[r`Fixpoint 3 — the system keeps the memory of the pulse (hysteresis)`, r`Fixpoint 1 — it returns to where it started`, r`Fixpoint 2`, r`It oscillates between 1 and 3`],
+  exp:r`From $y=0$ the cell settles at fixpoint 1. The pulse in $\beta_0$ removes the low fixpoint and drives the system to the high one. When $\beta_0$ returns, the high fixpoint (3) still exists and the cell stays there: it has memorised the pulse.` },
+
+{ id:'L2-13', lec:2, topic:'Ranking robustness', src:'Assignment 2 · Q3b',
+  q:r`Rank the circuits by the robustness of their steady state against changes of the removal rate $\alpha$ (most robust first).`,
+  opts:[r`NAR ($n=5$) > NAR ($n=1$) > simple regulation > PAR ($n=1$)`, r`Simple regulation > NAR ($n=1$) > NAR ($n=5$) > PAR ($n=1$)`, r`PAR ($n=1$) > simple regulation > NAR ($n=1$) > NAR ($n=5$)`, r`NAR ($n=1$) > NAR ($n=5$) > PAR ($n=1$) > simple regulation`],
+  exp:r`The steeper the production curve at the fixpoint, the less the intersection moves when the removal line is tilted. NAR with $n=5$ is steepest; NAR $n=1$ steep; simple regulation has a flat production curve; PAR ($n=1$) is rising, so the intersection moves the most.` },
+
+{ id:'L2-14', lec:2, topic:'Fastest and slowest circuit', src:'Assignment 2 · Q2d',
+  q:r`X (constant production), Y (negative autoregulation) and Z (positive autoregulation) have the same $\alpha$ and the same steady state. Order them by ON-switch response time, fastest first.`,
+  opts:[r`Y < X < Z`, r`X < Y < Z`, r`Z < X < Y`, r`Y < Z < X`], fixed:true, ans:0,
+  exp:r`NAR has the biggest gap between production and removal curve (fastest). PAR ($n=1$) has the smallest gap (slowest). Simple regulation is in between.` },
+
+
+/* ============================ LECTURE 3 ============================ */
+{ id:'L3-01', lec:3, topic:'Network motifs',
+  q:r`What defines a <b>network motif</b>, such as the feed-forward loop in the <i>E. coli</i> regulatory network?`,
+  opts:[r`A connection pattern that occurs significantly more often in the real network than in randomised networks with the same numbers of genes and connections`, r`Any pattern consisting of exactly three genes`, r`The most complex circuit in the network`, r`A pattern found in every organism`],
+  exp:r`Milo et al. (2002): the FFL appears 42 times in the <i>E. coli</i> network versus $1.7\pm1.2$ times in randomised networks. Over-representation suggests that the pattern has a conserved function.` },
+
+{ id:'L3-02', lec:3, topic:'Coherent vs. incoherent',
+  q:r`In the I1-FFL, X activates Y, Y represses Z, and X activates Z. Why is it called <i>incoherent</i>?`,
+  opts:[r`The direct effect of X on Z (+) and its indirect effect via Y (net −) have opposite signs`, r`Both Y and Z are repressors`, r`It has three nodes`, r`X is not regulated by any other gene`],
+  exp:r`In coherent FFLs the direct and the indirect path have the same net sign, in incoherent FFLs they have opposite signs.` },
+
+{ id:'L3-03', lec:3, topic:'Logic gates',
+  q:r`X and Y are both activators of Z. With $X=1$ and $Y=0$, Z is expressed for…`,
+  opts:[r`the OR gate, but not the AND gate`, r`the AND gate, but not the OR gate`, r`both gates`, r`neither gate`],
+  exp:r`An AND gate needs both inputs; an OR gate is satisfied by either one.` },
+
+{ id:'L3-04', lec:3, topic:'C1-FFL with AND gate',
+  q:r`X activates Y, and X <b>AND</b> Y are both required to activate Z (coherent type-1 FFL). What does the circuit do compared with simple regulation?`,
+  opts:[r`Delays Z after the ON switch of X, but not after the OFF switch`, r`Delays Z after the OFF switch of X, but not after the ON switch`, r`Delays both ON and OFF`, r`Accelerates the ON switch`],
+  exp:r`After the ON switch Z must wait until Y has crossed its threshold (delay). After the OFF switch, X disappearing immediately switches Z production off (no delay): sign-sensitive delay.` },
+
+{ id:'L3-05', lec:3, topic:'C1-FFL with OR gate',
+  q:r`Now Z is activated by X <b>OR</b> Y (coherent type-1 FFL). Compared with simple regulation, where is Z delayed?`,
+  opts:[r`After the OFF switch of X only`, r`After the ON switch of X only`, r`After both`, r`Nowhere`],
+  exp:r`ON: Z is activated as soon as X appears (no delay). OFF: Y is still present for a while and keeps Z on, so shut-off is delayed. This is what keeps the flagellar system running despite brief loss of signal.` },
+
+{ id:'L3-06', lec:3, topic:'Arabinose system',
+  q:r`In <i>E. coli</i>, <i>araBAD</i> is controlled by a C1-FFL with AND gate (CRP–cAMP → AraC; both, with arabinose, activate <i>araBAD</i>). What is the likely benefit?`,
+  opts:[r`The ON delay filters out brief arabinose pulses, so the system is switched on only after a sustained need`, r`It accelerates the response when arabinose appears`, r`It stores a memory of previous arabinose exposure`, r`It generates oscillations`],
+  exp:r`Short pulses end before Y has accumulated beyond its threshold, so Z is never turned on — a noise filter. Because the OFF step is not delayed, the system is shut off quickly when arabinose disappears (Mangan et al. 2003).` },
+
+{ id:'L3-07', lec:3, topic:'I1-FFL accelerates response', src:'Exam HS23/24 · Q3a,c',
+  q:r`Z reaches the same steady state in network A (X activates Z by simple regulation) and in network B (X activates Z via an incoherent FFL). Which statement about the response times of Z is correct?`,
+  opts:[r`B is faster for the ON switch, and the same for the OFF switch`, r`B is faster for both ON and OFF`, r`B is faster for the OFF switch, and the same for the ON switch`, r`A is faster for the ON switch`],
+  exp:r`In the I1-FFL, Z is initially produced at a high rate, later repressed by Y. To reach the same steady state, the simple system would need the lower production rate $\beta_2$, hence responds slower. In the OFF switch both decay with $\alpha$.` },
+
+{ id:'L3-08', lec:3, topic:'Pulse generation',
+  q:r`The figure shows an ON switch of X in a three-node circuit. What motif and behaviour does Z reveal?`,
+  fig:{ x:[0,10], y:[0,2.2], xl:'time', yl:'concentration',
+    curves:[ {fn:'x<1?0:1', c:'ink', lab:'X', labx:9.2, laby:0.1},
+             {fn:'x<1?0:1-exp(-(x-1))', c:'b', lab:'Y', labx:9.2, laby:-0.1},
+             {fn:'x<1?0:(x<1.693?2*(1-exp(-(x-1))):0.5+0.5*exp(-(x-1.693)))', c:'a', lab:'Z', labx:2.9, laby:-0.1, lw:3} ] },
+  opts:[r`I1-FFL: Z overshoots, then settles at a lower steady state — a pulse and a faster response`, r`C1-FFL with AND gate: Z is delayed`, r`C1-FFL with OR gate: Z has a delayed OFF response`, r`Simple regulation: Z follows X directly`],
+  exp:r`Z is produced strongly first; once Y has accumulated beyond its threshold, Y represses Z, and Z settles at a lower steady state. This is the signature of an incoherent FFL.` },
+
+{ id:'L3-09', lec:3, topic:'Identify the motif',
+  q:r`X is switched ON at $t=1$ and OFF at $t=7$. Which circuit produces these dynamics of Z?`,
+  fig:{ x:[0,12], y:[0,1.15], xl:'time', yl:'concentration',
+    curves:[ {fn:'x<1?0:(x<7?1:0)', c:'ink', lab:'X', labx:5.6, laby:0.07},
+             {fn:'x<1?0:(x<7?1-exp(-(x-1)):0.9975*exp(-(x-7)))', c:'b', lab:'Y', labx:9.6, laby:0.08},
+             {fn:'x<1.693?0:(x<7?1-exp(-(x-1.693)):0.995*exp(-(x-7)))', c:'a', lab:'Z', labx:3.8, laby:0.07, lw:3} ] },
+  opts:[r`C1-FFL with AND gate`, r`C1-FFL with OR gate`, r`I1-FFL`, r`Simple regulation`],
+  exp:r`Z starts rising only after Y has crossed its threshold (delay at ON), but drops immediately when X is switched off (no delay at OFF): sign-sensitive delay of the C1-FFL with AND gate.` },
+
+{ id:'L3-10', lec:3, topic:'Effect of β in an I1-FFL', src:'Exam HS23/24 · Q3d',
+  q:r`In an I1-FFL, Z is produced at rate $\beta$ while $Y \lt K$ and at the lower rate $\beta'<\beta$ once $Y \gt K$. Assume Z reaches half of its final level ($\beta'/2\alpha$) <b>before</b> Y crosses $K$. What happens to the response time of Z at the ON switch when $\beta$ is increased (with $\beta'$ fixed)?`,
+  opts:[r`It gets smaller`, r`It gets bigger`, r`It does not change`, r`Z no longer reaches a steady state`], fixed:true, ans:0,
+  exp:r`Before repression Z rises as $\frac{\beta}{\alpha}(1-e^{-\alpha t})$. A higher $\beta$ reaches the target level $\beta'/(2\alpha)$ earlier. The final steady state ($\beta'/\alpha$) is unchanged.` },
+
+{ id:'L3-11', lec:3, topic:'Non-monotonic input function',
+  q:r`In the galactose system an I1-FFL (CRP → GalS ⊣ <i>galETK</i>, CRP → <i>galETK</i>) controls the target. How does <i>galETK</i> expression depend on the CRP–cAMP level?`,
+  opts:[r`Non-monotonic: highest at intermediate CRP, lower at high CRP`, r`Monotonically increasing`, r`Monotonically decreasing`, r`A sharp step function`],
+  exp:r`At intermediate X, Z is strongly activated while Y is still too low to repress. At high X, Y becomes high enough to repress Z. This non-monotonic response disappears in <i>galS</i> mutants (Kaplan et al. 2008).` },
+
+{ id:'L3-11b', lec:3, topic:'Summary of mechanisms',
+  q:r`Which mechanism accelerates the <b>ON</b> switch (but not the OFF switch) <b>and works for any target gene</b>, not only for transcription factors?`,
+  opts:[r`I1-FFL`, r`Negative autoregulation`, r`Positive autoregulation`, r`C1-FFL with AND gate`],
+  exp:r`NAR accelerates the ON switch too, but requires that the target is itself a transcription factor. The I1-FFL works for any Z. PAR and the C1-FFL slow responses down.` },
+
+{ id:'L3-12', lec:3, topic:'Summary of mechanisms',
+  q:r`Which of these mechanisms slows down <b>both</b> the ON and the OFF switch of a target gene?`,
+  opts:[r`Positive autoregulation`, r`Negative autoregulation`, r`I1-FFL`, r`C1-FFL with AND gate`],
+  exp:r`PAR slows both (and can create bistability). The C1-FFL is sign-sensitive (delays either ON or OFF depending on the gate). NAR and I1-FFL accelerate the ON switch.` },
+
+
+/* ============================ LECTURE 4 ============================ */
+{ id:'L4-01', lec:4, topic:'Stability in 1D', src:'Assignment 3 · Q2',
+  q:r`Consider $\dot x=f(x)=(x-1)(x-2)$ (graph). Which statement is correct?`,
+  fig:{ x:[0,3], y:[-0.45,1.4], xl:'x', yl:'dx/dt', ticks:true,
+    curves:[ {fn:'(x-1)*(x-2)', c:'a'} ], pts:[ {x:1,y:0,lab:'x₁',fill:'n'}, {x:2,y:0,lab:'x₂',fill:'n'} ] },
+  opts:[r`$x=1$ is stable and $x=2$ is unstable`, r`$x=1$ is unstable and $x=2$ is stable`, r`Both fixpoints are stable`, r`Both fixpoints are unstable`],
+  exp:r`A fixpoint is stable if $f'(x^*)<0$. Here $f'(x)=2x-3$: $f'(1)=-1<0$ (stable), $f'(2)=+1>0$ (unstable). On the graph: $f>0$ means $x$ increases, $f<0$ means it decreases.` },
+
+{ id:'L4-02', lec:4, topic:'Bifurcation', src:'Assignment 3 · Q2c',
+  q:r`For $\dot x=(x-1)(x-2)+c$, at which value of $c$ do the two fixpoints disappear?`,
+  opts:[r`$c=1/4$`, r`$c=0$`, r`$c=2$`, r`$c=-1/4$`],
+  exp:r`Fixpoints solve $x^2-3x+2+c=0$ with discriminant $1-4c$. It vanishes at $c=1/4$; for $c>1/4$ there is no fixpoint. This is a (saddle-node) bifurcation.` },
+
+{ id:'L4-03', lec:4, topic:'Bifurcation',
+  q:r`What happens to the two fixpoints of $\dot x=(x-1)(x-2)+c$ as $c$ is increased from 0 to $1/4$?`,
+  opts:[r`The stable and the unstable fixpoint approach each other, collide and annihilate`, r`The stable fixpoint becomes unstable and both remain`, r`They move apart from each other`, r`A third fixpoint appears between them`],
+  exp:r`Increasing $c$ shifts the curve upward. The stable (left) and unstable (right) fixpoints move together and vanish at $c=1/4$. This is how a pulse can switch a bistable system.` },
+
+{ id:'L4-04', lec:4, topic:'Fixpoints in 2D',
+  q:r`Find the fixpoint of $\dot x=-2x+y+5,\ \ \dot y=x-2y+5$.`,
+  opts:[r`$(x,y)=(5,5)$`, r`$(x,y)=(0,0)$`, r`$(x,y)=(2.5,2.5)$`, r`$(x,y)=(10,10)$`],
+  exp:r`Set $\dot x=\dot y=0$: from the first equation $y=2x-5$; inserted into the second: $x-4x+10+5=0\Rightarrow x=5$, $y=5$. (Here all arrows point toward it — a stable fixpoint.)` },
+
+{ id:'L4-05', lec:4, topic:'Fixpoint type',
+  q:r`For $\dot x=2x+y-15,\ \dot y=-x-3y+20$, where is the fixpoint and what is its type? (Lecture slides)`,
+  opts:[r`$(5,5)$, saddle — unstable`, r`$(5,5)$, stable node`, r`$(3,3)$, saddle`, r`$(5,5)$, stable spiral`],
+  exp:r`$\dot x=\dot y=0$ gives $y=15-2x$ and $x+3y=20$, so $x=y=5$. Trajectories approach along one direction and leave along another: a saddle, which is unstable.` },
+
+{ id:'L4-06', lec:4, topic:'Nullclines',
+  q:r`What is the <b>x-nullcline</b> of a two-dimensional system?`,
+  opts:[r`The set of points where $\dot x=0$ (x does not change)`, r`The set of points where $x=0$`, r`The set of points where $\dot x=\dot y=0$`, r`The set of points where $\dot y=0$`],
+  exp:r`Nullclines are obtained by setting a time derivative to zero. Where an x-nullcline and a y-nullcline intersect, both derivatives vanish: that is a fixpoint.` },
+
+{ id:'L4-07', lec:4, topic:'Toggle switch', src:'Exam HS21–24 · Q5',
+  q:r`Two repressors: $\dot x=\frac{2}{1+y^4}-x$, $\dot y=\frac{2}{1+x^4}-y$. The nullclines are drawn. How many fixpoints exist, and how many are stable?`,
+  fig:{ x:[0,2.4], y:[0,2.4], xl:'x', yl:'y',
+    ticks:true,
+    curves:[ {fx:'2/(1+y**4)', c:'a', lab:"x' = 0", laby:1.3, labx:0.28, lw:2.5}, {fn:'2/(1+x**4)', c:'b', lab:"y' = 0", labx:1.35, laby:0.2, lw:2.5} ],
+    pts:[ {x:0.1177,y:1.9996,fill:'n'}, {x:1,y:1,fill:'n'}, {x:1.9996,y:0.1177,fill:'n'} ] },
+  opts:[r`3 fixpoints, 2 stable`, r`3 fixpoints, all stable`, r`3 fixpoints, 1 stable`, r`1 fixpoint, stable`],
+  exp:r`The nullclines cross at (0.12, 2.0), (1, 1) and (2.0, 0.12). The two asymmetric ones (one gene ON, one OFF) are stable; the symmetric one in the middle is a saddle (unstable). The circuit is bistable.` },
+
+{ id:'L4-08', lec:4, topic:'Memory in the toggle switch', src:'Exam HS21–24 · Q5c',
+  q:r`Mutual repression: $\dot x=\frac{2}{1+y^n}-x$, $\dot y=\frac{2}{1+x^n}-y$. For which Hill coefficient can the circuit implement <b>cellular memory</b>?`,
+  opts:[r`Only for $n>2$ (two stable fixpoints)`, r`Only for $n=1$`, r`For both $n=1$ and $n>2$`, r`For neither`],
+  exp:r`For $n=1$ the nullclines cross only once, at (1,1): a single stable fixpoint, no memory. For $n>2$ they cross three times: two stable fixpoints, and the state depends on history.` },
+
+{ id:'L4-09', lec:4, topic:'Mutual activation', src:'Assignment 3 · Q4',
+  q:r`Two transcription factors activate each other (Hill coefficients $n=4$). How does this compare with the toggle switch (mutual repression)?`,
+  opts:[r`Also bistable and able to store memory, but the states are "both low" and "both high" instead of exclusive expression`, r`Also bistable, with exclusive expression: either X or Y is high`, r`Only one stable fixpoint, no memory`, r`The system oscillates`],
+  exp:r`Mutual activation gives two stable states (both OFF / both ON) plus an unstable one in between. With Hill coefficients of 1 only one stable fixpoint (both ON) remains, so the memory is lost (Assignment 3, Q4e).` },
+
+{ id:'L4-10', lec:4, topic:'From diagram to equations', src:'Lecture 4 · Exam HS24 Q5a',
+  q:r`Wiring diagram: X activates its own production (Hill, $n=1$); X activates the production of Y; Y <b>activates the removal</b> of X. Which model matches?`,
+  opts:[r`$\dot x=\beta_x\frac{x}{x+K_{xx}}-(\alpha_x+\alpha_{xy}\,y)\,x,\quad \dot y=\beta_y\frac{x}{x+K_{xy}}-\alpha_y\,y$`,
+        r`$\dot x=\beta_x\frac{x}{x+K_{xx}}-\alpha_x x,\quad \dot y=\beta_y\frac{x}{x+K_{xy}}-(\alpha_y+\alpha_{yx}\,x)\,y$`,
+        r`$\dot x=\beta_x\frac{x}{x+K_{xx}}\cdot\frac{K_{yx}}{y+K_{yx}}-\alpha_x x,\quad \dot y=\beta_y\frac{x}{x+K_{xy}}-\alpha_y\,y$`,
+        r`$\dot x=\beta_x-(\alpha_x+\alpha_{xy}\,y)\,x,\quad \dot y=\beta_y\frac{K_{xy}}{x+K_{xy}}-\alpha_y\,y$`],
+  exp:r`Production of X: Hill term in x. Removal of X: passive ($\alpha_x$) plus active degradation by Y ($\alpha_{xy}y$). Production of Y: activated by X. The other options put the effect on the wrong target (removal of Y), make Y repress production, or drop the self-activation.` },
+
+{ id:'L4-11', lec:4, topic:'From equations to diagram', src:'Exam HS22–24 · Q7/Q5b',
+  q:r`$\dot x=\dfrac{x}{1+x}-2xy,\qquad \dot y=\dfrac{x}{2+x}-y^2$. Which interaction is <b>not</b> encoded?`,
+  opts:[r`Y represses the production of X`, r`X activates its own production`, r`Y enhances the removal of X`, r`X activates the production of Y`],
+  exp:r`$x/(1+x)$ is self-activation of X; $-2xy$ is removal of X promoted by Y; $x/(2+x)$ is activation of Y's production by X. Y does not appear in the production term of X.` },
+
+{ id:'L4-12', lec:4, topic:'Oscillator ingredients',
+  q:r`Which ingredients are required for a genetic oscillator (cf. the shower analogy)?`,
+  opts:[r`Negative feedback, delay (slow variable) and ultrasensitivity`, r`Positive feedback, bistability and noise`, r`Cooperativity, high degradation and noise`, r`Autoregulation, a feed-forward loop and a third node`],
+  exp:r`Like the badly regulated shower: negative feedback (you adjust the tap), delay (the water temperature responds late) and ultrasensitivity (an almost step-wise response) together lead to over-shooting in both directions.` },
+
+{ id:'L4-13', lec:4, topic:'Relaxation oscillator',
+  q:r`In the oscillator, x is fast and y is slow, and the x-nullcline has a peak and a valley. For which position of the fixpoint does the system oscillate?`,
+  opts:[r`On the middle branch of the x-nullcline between peak and valley, where it is unstable`, r`On the outer branch, right of the peak, where it is stable`, r`Anywhere, as long as there is exactly one fixpoint`, r`Only if the y-nullcline is also non-monotonic`],
+  exp:r`If the fixpoint sits between peak and valley it is unstable: the system creeps along a branch, jumps quickly to the other branch at the peak/valley, and repeats forever. If the fixpoint lies on an outer branch the system settles there. A small parameter change can switch between these cases (bifurcation).` },
+
+{ id:'L4-14', lec:4, topic:'C. elegans oscillator', src:'Slides 5 · Stojanovski et al. 2022',
+  q:r`In <i>C. elegans</i> an oscillating clock controls larval stage duration. Destabilising one oscillator component (faster degradation of BLMP-1) speeds up the oscillation. Growth is unchanged. What happens to the animals?`,
+  opts:[r`They become smaller, because each larval stage ends at a smaller size`, r`They become larger`, r`Their size is unchanged`, r`Their development stops`],
+  exp:r`Faster oscillations accelerate development with the same growth rate, so animals reach the next stage — and adulthood — at a smaller size.` },
+
+
+/* ===================== MORE EXAM TOPICS (HS24) ===================== */
+{ id:'X-01', lec:7, topic:'Michaelis–Menten', src:'Exam HS24 · Q7',
+  q:r`In the Michaelis–Menten approximation $\dfrac{dp}{dt}=V_{max}\dfrac{S}{K_M+S}$. At which substrate concentration is the rate half-maximal?`,
+  opts:[r`$S=K_M$`, r`$S=V_{max}/2$`, r`$S=2K_M$`, r`$S=K_M/2$`],
+  exp:r`At $S=K_M$ the rate is $V_{max}\cdot\frac12$. For $S\ll K_M$ the rate grows linearly with $S$; for $S\gg K_M$ it saturates at $V_{max}$.` },
+
+{ id:'X-02', lec:7, topic:'Michaelis–Menten',
+  q:r`For $S\gg K_M$, how does the rate of product formation depend on the substrate concentration?`,
+  opts:[r`It saturates at $\approx V_{max}$, independent of $S$`, r`It increases linearly with $S$`, r`It decreases towards zero`, r`It equals $K_M$`],
+  exp:r`$S/(K_M+S)\to1$: all enzyme molecules are busy (saturated), and adding substrate does not increase the rate.` },
+
+{ id:'X-03', lec:7, topic:'Michaelis–Menten units',
+  q:r`If $p$ is a concentration (M) and time is in seconds, what are the units of $K_M$ and $V_{max}$ in $\dfrac{dp}{dt}=V_{max}\dfrac{S}{K_M+S}$?`,
+  opts:[r`$K_M$: M; $V_{max}$: M/s`, r`$K_M$: M/s; $V_{max}$: M`, r`$K_M$: 1/s; $V_{max}$: M`, r`Both: M/s`],
+  exp:r`$S/(K_M+S)$ must be dimensionless, so $K_M$ has the units of a concentration (it is the half-saturating concentration). $V_{max}$ has the units of $dp/dt$.` },
+
+{ id:'X-04', lec:7, topic:'MAPK cascade with feedback', src:'Exam HS24 · Q8b',
+  q:r`In a MAPK cascade with constant input, ERKp rises to a plateau. How does the response change when ERKp inhibits the phosphorylation of Raf (negative feedback)?`,
+  opts:[r`The response may overshoot and then settle at a lower steady-state level`, r`ERKp settles at a higher level, but more slowly`, r`The system becomes bistable and ERKp remains at zero`, r`There is no change`],
+  exp:r`Negative feedback reduces the activity of the upstream kinase once ERKp has built up, so ERKp comes down from its early peak to a lower plateau (adaptation). With enough delay and nonlinearity it can even oscillate.` },
+
+
+/* ============================ LECTURE 5 ============================ */
+{ id:'L5-01', lec:5, topic:'Exponential growth', src:'Assignment 4 · Q1',
+  q:r`Strain A doubles every 30 min, strain B every 33 min. Both start with 100 cells and grow exponentially without limitation. What is $n_A/n_B$ after 10 h?`,
+  opts:[r`About 3.5`, r`About 1.1`, r`About 10`, r`About 100`],
+  exp:r`$n_A/n_B=2^{10/0.5-10/0.55}=2^{20-18.18}=2^{1.82}\approx3.5$. After 5 h the ratio is 1.9, after 20 h it is 12.4 — a 10 % difference in growth time is amplified exponentially.` },
+
+{ id:'L5-02', lec:5, topic:'Competition', src:'Exam HS21 · Q6',
+  q:r`Strain A doubles every 1 h, strain B every 2 h. You start with 100 cells of each and let them grow for 10 h without interaction and with unlimited nutrients. What is $n_A/n_B$?`,
+  opts:[r`32`, r`5`, r`10`, r`1024`],
+  exp:r`$n_A=100\cdot2^{10}$, $n_B=100\cdot2^{5}$, so $n_A/n_B=2^5=32$.` },
+
+{ id:'L5-03', lec:5, topic:'Early vs. late reproduction', src:'Exam HS21/22 · Q7/Q9a',
+  q:r`Which strain has the faster rate of population increase?` + tbl([0,0,0,2,2,0,0],[0,0,0,3,3,0,0]),
+  opts:[r`Strain B`, r`Strain A`, r`Both increase at the same rate`, r`Cannot be decided`], 
+  exp:r`Both reproduce at the same ages, but B has more progeny each time, so it grows faster.` },
+
+{ id:'L5-04', lec:5, topic:'Early vs. late reproduction', src:'Exam HS21/22 · Q7/Q9c',
+  q:r`Which strain has the faster rate of population increase?` + tbl([0,2,2,0,0,0,0],[0,0,0,0,0,3,3]),
+  opts:[r`Strain A (earlier, fewer progeny)`, r`Strain B (later, more progeny)`, r`Both increase at the same rate`, r`Cannot be decided`],
+  exp:r`Solving the Euler–Lotka equation $\sum_x m_x e^{-rx}=1$: A ($2e^{-2r}+2e^{-3r}=1$) gives $r\approx0.57$ per day, B ($3e^{-6r}+3e^{-7r}=1$) gives $r\approx0.28$ per day. Early offspring "earn compound interest" sooner.` },
+
+{ id:'L5-05', lec:5, topic:'Alternating environments', src:'Assignment 4 · Q2',
+  q:r`Strain A adjusts to the environment: doubling time 1 h in both E1 and E2. Strain B is an E1 specialist: 0.5 h in E1, 10 h in E2. Let $f$ be the fraction of time spent in E1. For which $f$ is the long-run growth rate of A higher than that of B?`,
+  opts:[r`$f<0.47$ (E1 is rare)`, r`$f>0.47$`, r`$f<0.1$`, r`For every $f$`],
+  exp:r`$\mu_A=\ln2$; $\mu_B(f)=\ln2\,[2f+0.1(1-f)]=\ln2\,(0.1+1.9f)$. They are equal at $f^*=0.9/1.9\approx0.47$; A wins when E1 is occurring less than about 47 % of the time.` },
+
+{ id:'L5-06', lec:5, topic:'Optimal expression', src:'Assignment 4 · Q3',
+  q:r`In environment B, $\mu_B(x)=-2(x-0.25)^2+1.125$; in environment A the optimum is $x^*_A=0.5$. A strain keeps $x=0.5$ in B. How large is its growth disadvantage compared with a strain adapted to B ($x^*_B=0.25$)?`,
+  opts:[r`About 11 %`, r`About 50 %`, r`About 25 %`, r`None`],
+  exp:r`$\mu_B(0.5)=-2(0.25)^2+1.125=1.0$ versus $\mu_B(0.25)=1.125$. The disadvantage is $0.125/1.125\approx11\,\%$ — enough for strong selection.` },
+
+{ id:'L5-07', lec:5, topic:'Optimal expression', src:'Exam HS23 · Q8b',
+  q:r`Growth rates: $\mu_1(x)=-(x-1)^2+1$ in E1 and $\mu_2(x)=-1.5(x-2)^2+2$ in E2 (see graph, in h$^{-1}$). Strain A keeps $x=x_1^*=1$ in both environments. What is its growth rate in E2?`,
+  fig:{ x:[0,3], y:[-1.2,2.3], xl:'expression x', yl:'growth rate μ (1/h)', ticks:true,
+    curves:[ {fn:'1-(x-1)**2', c:'a', lab:'E1', labx:0.3, laby:-0.2}, {fn:'-1.5*(x-2)**2+2', c:'b', lab:'E2', labx:2.5, laby:-0.2} ] },
+  opts:[r`0.5 h$^{-1}$`, r`1 h$^{-1}$`, r`2 h$^{-1}$`, r`$-0.5$ h$^{-1}$`],
+  exp:r`$\mu_2(1)=-1.5(1-2)^2+2=0.5$ h$^{-1}$, compared with the maximum $\mu_2(2)=2$ h$^{-1}$.` },
+
+{ id:'L5-08', lec:5, topic:'Optimal expression', src:'Exam HS23 · Q8c',
+  q:r`Continuing: strain B adjusts to $x=2$ in E2 and grows at 2 h$^{-1}$; strain A grows at 0.5 h$^{-1}$ in E2. The cells grow as $n(t)=n_0\,2^{\mu t}$. You start both with equal numbers in E2. When are there 8 times more cells of B than of A?`,
+  opts:[r`After 2 h`, r`After 4 h`, r`After 1.5 h`, r`After 3 h`],
+  exp:r`$n_B/n_A=2^{(2-0.5)t}=8=2^3\Rightarrow1.5\,t=3\Rightarrow t=2$ h.` },
+
+{ id:'L5-09', lec:5, topic:'Fluctuating environments', src:'Exam HS24 · Q6b',
+  q:r`With $\mu_1,\mu_2$ as before, strain A ($x=2$ always) grows at $\mu_{1,A}=0$ in E1 and $\mu_{2,A}=2$ h$^{-1}$ in E2. Strain B adapts ($\mu_1=1$, $\mu_2=2$ h$^{-1}$). The environment switches every hour. What is $n_B/n_A$ after 4 h (equal start)?`,
+  opts:[r`4`, r`2`, r`8`, r`16`],
+  exp:r`In 4 h there are 2 h of E1 and 2 h of E2. B gains $2^{1\cdot2}$ on A in E1 (A does not grow), and nothing in E2 (both grow at 2 h$^{-1}$): $n_B/n_A=2^2=4$.` },
+
+{ id:'L5-10', lec:5, topic:'Fluctuating environments', src:'Exam HS24 · Q6b',
+  q:r`Same alternating scheme (1 h each). What is the minimal growth rate $\mu_{2,A}'$ that strain A needs in E2 so that it is not out-competed by B in the long run?`,
+  opts:[r`3 h$^{-1}$`, r`2 h$^{-1}$`, r`1.5 h$^{-1}$`, r`4 h$^{-1}$`],
+  exp:r`Long-run growth rate = average over the cycle. B: $(1+2)/2=1.5$. A: $(0+\mu'_{2,A})/2\ge1.5\Rightarrow\mu'_{2,A}\ge3$ h$^{-1}$.` },
+
+{ id:'L5-11', lec:5, topic:'Growth model: R and C', src:'Towbin et al. 2017 · Lecture 5',
+  q:r`In the simple growth model the proteome consists of ribosomes R and metabolic enzymes C ($R+C=1$). Why is growth maximal at an intermediate ribosome fraction?`,
+  opts:[r`Too few ribosomes limit protein synthesis; too few enzymes starve the ribosomes of the substrate x`, r`Ribosomes become toxic at high levels`, r`Enzymes C are cheap, so a larger C is always better`, r`Growth is highest when $R=1$`],
+  exp:r`Growth rate is the rate at which ribosomes convert x into protein. Many C but few R leaves ribosomes saturated and surplus C wasted; many R but few C leaves ribosomes idle for lack of x. The optimum balances both.` },
+
+{ id:'L5-12', lec:5, topic:'Environment quality',
+  q:r`In the growth model, the environment gets better (higher $\beta$: producing x requires less C). How does the growth-maximising enzyme fraction C change?`,
+  opts:[r`It decreases (more ribosomes can be afforded), and the growth rate is higher`, r`It increases`, r`It is unchanged`, r`It oscillates`],
+  exp:r`Better environment means less C is needed per unit of x, so the proteome can shift towards ribosomes. The maxima for different $\beta$ lie on a near-linear "C-line".` },
+
+{ id:'L5-13', lec:5, topic:'Feedback control of allocation',
+  q:r`Which regulatory interaction lets <i>E. coli</i> adjust C to the optimal level in many environments?`,
+  opts:[r`Negative feedback: the intermediate x represses the synthesis of C (via CRP–cAMP)`, r`Positive feedback: x activates the synthesis of C`, r`Constitutive expression of C`, r`A feed-forward loop from R to C`],
+  exp:r`If C is too high, x accumulates, and repression of further C synthesis lowers C. If C is too low, x is depleted, repression is relieved, and C synthesis rises. CRP is activated when the internal carbon pool is depleted.` },
+
+{ id:'L5-14', lec:5, topic:'Galactose exception',
+  q:r`Why do <i>E. coli</i> grow suboptimally on galactose, with too much C and too little R?`,
+  opts:[r`<i>galETK</i> is under non-monotonic control by CRP (I1-FFL via GalS): when starved cells raise CRP, <i>galETK</i> falls, which aggravates the starvation`, r`Galactose is toxic to the cells`, r`CRP is absent on galactose`, r`Galactose genes are under positive autoregulation`],
+  exp:r`The wrong sign of the response at high CRP creates a vicious cycle until growth is very slow. In <i>galS</i> mutants the FFL is broken, control is monotonic and cells grow optimally, as the model predicts.` },
+
+
+/* ============================ LECTURE 6 ============================ */
+{ id:'L6-01', lec:6, topic:'Coefficient of variation',
+  q:r`Population A has expression values 3, 4, 5, 6, 7; population B has 1, 3, 5, 7, 9. Both have a mean of 5. Which statement is correct?`,
+  opts:[r`B has the larger CV (more heterogeneous)`, r`A has the larger CV`, r`Both have the same CV`, r`CVs cannot be compared when the means are equal`],
+  exp:r`$\mathrm{CV}=\mathrm{std}/\mathrm{mean}$. With equal means, the broader distribution (B) has the larger standard deviation and thus the larger CV.` },
+
+{ id:'L6-02', lec:6, topic:'Coefficient of variation',
+  q:r`A new microscope setting makes all measured fluorescence values 10 times brighter. What happens to the CV of a population?`,
+  opts:[r`It is unchanged (std and mean both scale by 10)`, r`It increases 10-fold`, r`It decreases 10-fold`, r`It increases $\sqrt{10}$-fold`],
+  exp:r`The CV is dimensionless: multiplying all values by a constant multiplies both standard deviation and mean by it.` },
+
+{ id:'L6-03', lec:6, topic:'Poisson noise',
+  q:r`Two genes have an average of 5 and 500 mRNA molecules per cell, respectively. Which gene shows the larger relative (Poisson) noise from random mRNA numbers?`,
+  opts:[r`The gene with 5 mRNAs`, r`The gene with 500 mRNAs`, r`Both equal`, r`Poisson noise depends only on the protein half-life`],
+  exp:r`For Poisson statistics std $=\sqrt{m}$, so CV $=1/\sqrt m$: $\approx0.45$ for 5 molecules, $\approx0.045$ for 500. Small molecule numbers cause large relative noise.` },
+
+{ id:'L6-04', lec:6, topic:'Bursty transcription',
+  q:r`Two genes have the same average mRNA level. In gene 1 the promoter switches between ON and OFF states and transcribes in bursts (two-state model); gene 2 is transcribed constitutively. How do the noise levels compare?`,
+  opts:[r`Gene 1 (bursty) is noisier than Poisson noise alone would predict`, r`Gene 1 is less noisy`, r`The same, since the means are the same`, r`Bursting only matters for protein, not mRNA`],
+  exp:r`Bursts of mRNA production followed by silence add variability beyond the Poisson noise of constitutive expression.` },
+
+{ id:'L6-05', lec:6, topic:'Intrinsic vs. extrinsic noise',
+  q:r`Two identical promoters drive CFP and YFP in the same cell. In many cells both reporters are high or low together, with little independent difference. Which noise source dominates?`,
+  opts:[r`Extrinsic noise (shared factors such as ribosomes, polymerase, cell size)`, r`Intrinsic noise (random events at each gene)`, r`Measurement noise only`, r`There is no noise`],
+  exp:r`Extrinsic noise affects all genes in a cell in the same direction. Intrinsic noise would make the two identical reporters differ independently within the same cell.` },
+
+{ id:'L6-06', lec:6, topic:'Noise and feedback', src:'Slides 2 · Becskei & Serrano 2000',
+  q:r`How does negative autoregulation affect the cell-to-cell variability (CV) of expression, compared with an unregulated gene of the same mean?`,
+  opts:[r`It reduces noise`, r`It increases noise`, r`It has no effect on noise`, r`It makes expression bimodal`],
+  exp:r`Negative feedback pulls fluctuations back towards the set point, so the distribution is narrower (Becskei & Serrano 2000).` },
+
+{ id:'L6-07', lec:6, topic:'Bimodality', src:'Slides 2 · Ozbudak et al. 2004',
+  q:r`At intermediate inducer concentration (TMG), cells of the lac operon circuit split into two subpopulations of low and high expression. Which circuit property explains this best?`,
+  opts:[r`Positive feedback creating bistability (and hysteresis)`, r`Negative autoregulation`, r`An incoherent feed-forward loop`, r`Fast mRNA degradation`],
+  exp:r`Bimodal distributions at intermediate input are the signature of bistable systems with positive feedback, where individual cells settle in one of two stable states.` },
+
+{ id:'L6-08', lec:6, topic:'Size uniformity', src:'Slides 5 · C. elegans',
+  q:r`Individual <i>C. elegans</i> differ in growth rate by about 10 %. Nevertheless, adult sizes differ only by about 10 % as well, much less than exponential growth would predict. What explains this?`,
+  opts:[r`Slow growers grow for longer, so all individuals undergo the same fold-change in body volume`, r`Growth rates do not really differ`, r`Size is determined only by the amount of food`, r`Fast growers stop growing early because they run out of food`],
+  exp:r`Exponential growth would turn a 10 % rate difference into a roughly 60 % size difference. Developmental timing is coordinated with growth, so each animal reaches the same final size.` },
+
+{ id:'L6-09', lec:6, topic:'Proportion control', src:'Slides 6 · pharynx vs. body',
+  q:r`Inhibiting growth of the <i>C. elegans</i> pharynx alone also slows body growth, and pharynx-to-body proportions deviate by less than about 5–8 %. If tissues grew <i>independently</i>, what would you expect?`,
+  opts:[r`Strong divergence of pharynx-to-body proportions, so growth must be coordinated between tissues`, r`The same near-perfect proportions`, r`Larger worms with larger pharynx`, r`Nothing, since pharynx growth is not exponential`],
+  exp:r`Two independent exponentially growing tissues would drift apart rapidly after growth inhibition. The observed robustness implies coordination (systemic feedback) between tissues.` },
+
+{ id:'L6-10', lec:6, topic:'Bet hedging', src:'Slides 6 · Balaban et al. 2004',
+  q:r`Which statement describes antibiotic <b>persisters</b> (Balaban et al. 2004) best?`,
+  opts:[r`A small subpopulation of slow-growing, antibiotic-tolerant cells, generated stochastically — a bet-hedging strategy`, r`Genetically resistant mutants`, r`Dead cells that stain positive`, r`Cells that acquired a plasmid with a resistance gene`],
+  exp:r`Persisters are phenotypic, non-inherited variants. A few cells in a clonal population are in a dormant state, ensuring survival of the population if an antibiotic arrives.` }
+
+];
+
+</script>
+
+<script>
+(function(){
+'use strict';
+
+/* ====================================================================
+   SETTINGS  (edit here)
+   ==================================================================== */
+const TITLE        = 'Systems Biology';          // shown in the header
+const PEER_PREFIX  = 'sysbio-quiz-';             // prefix of the room id on the public PeerJS broker
+const ICE_SERVERS  = [                            // STUN servers (add a TURN server here if campus Wi-Fi blocks peer-to-peer)
+  {urls:'stun:stun.l.google.com:19302'},
+  {urls:'stun:stun1.l.google.com:19302'},
+  {urls:'stun:global.stun.twilio.com:3478'},
+  // PeerJS' own public relay (the library default, shared & best-effort, UDP 3478 only). Add your own TURN below for reliability.
+  {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'], username:'peerjs', credential:'peerjsp'}
+];
+// TURN relay (makes live mode work across restrictive networks). Option A: fixed credentials here:
+const TURN_SERVERS = [
+  // {urls:'turn:turn.example.org:443?transport=tcp', username:'USER', credential:'PASSWORD'},
+];
+// Option B: a URL that returns a JSON array of iceServers (e.g. Metered: 'https://YOURAPP.metered.live/api/v1/turn/credentials?apiKey=YOURKEY')
+const TURN_CREDENTIALS_URL = '';
+// Advanced: self-hosted PeerJS server -> define window.SBQ_PEER = {host:'...', port:443, path:'/', secure:true} before this script.
+let ICE_LIVE = ICE_SERVERS.concat(TURN_SERVERS);
+const iceReady = (async () => {
+  if(!TURN_CREDENTIALS_URL) return;
+  try{ const ctl=new AbortController(), t=setTimeout(()=>ctl.abort(),4000);
+       const r=await fetch(TURN_CREDENTIALS_URL,{signal:ctl.signal}); clearTimeout(t); const j=await r.json();
+       if(Array.isArray(j)) ICE_LIVE = ICE_SERVERS.concat(TURN_SERVERS, j); }catch(e){}
+})();
+// add ?relay to the address (students: ?join=CODE&relay, presenter: ?relay#host) to force relay-only and thereby test the TURN server
+const peerOpts = () => Object.assign({debug:1, config:{iceServers:ICE_LIVE, iceTransportPolicy:new URLSearchParams(location.search).has('relay')?'relay':'all'}}, window.SBQ_PEER || {});
+
+/* ====================================================================
+   HELPERS
+   ==================================================================== */
+const app = document.getElementById('app');
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LETTERS = 'ABCDEFGH';
+const byId = {}; QUESTIONS.forEach(q => byId[q.id] = q);
+const lecNums = Object.keys(LECTURES).map(Number).sort((a,b)=>a-b);
+const lecLabel = n => n===7 ? LECTURES[7] : 'Lecture '+n+' · '+LECTURES[n];
+const hashStr = s => { let h=2166136261>>>0; for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);} return h>>>0; };
+const mulberry = a => () => { a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
+const VER = QUESTIONS.length+'-'+hashStr(QUESTIONS.map(q=>q.id+':'+q.q.length+':'+q.opts.join('').length).join('|')).toString(36);
+const correctOf = q => q.ans||0;
+function shuffled(arr, rnd){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+// display order of the options of q (array of original indices). Deterministic for a given seed.
+function optOrder(q, seed){ const idx=q.opts.map((_,i)=>i); return q.fixed ? idx : shuffled(idx, mulberry(hashStr(q.id+'|'+(seed||'')))); }
+
+function typeset(el){
+  const run = () => { if(window.renderMathInElement){ try{ renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); }catch(e){} } };
+  if(window.renderMathInElement) run(); else window.addEventListener('load', run, {once:true});
+}
+
+/* ====================================================================
+   FIGURES  (small SVG plotter driven by the `fig` field of a question)
+   fig = { x:[x0,x1], y:[y0,y1], xl, yl, ticks:true, xticks:[[v,label]], yticks:[[v,label]],
+           curves:[{fn:'expr in x' | fx:'expr in y', c:'a|b|c|d|ink', dash, lw, lab, labx, laby}],
+           pts:[{x,y,lab,fill:'n'}], hlines:[{y,dash}], vlines:[{x,dash}] }
+   ==================================================================== */
+function plot(s){
+  const W=s.w||440, H=s.h||300, m={l:52,r:18,t:16,b:46};
+  const [x0,x1]=s.x, [y0,y1]=s.y;
+  const sx=x=>m.l+(x-x0)/(x1-x0)*(W-m.l-m.r), sy=y=>H-m.b-(y-y0)/(y1-y0)*(H-m.t-m.b);
+  const mk=(expr,v)=>{ try{ return new Function(v,'with(Math){return ('+expr+');}'); }catch(e){ return ()=>NaN; } };
+  const nice=(a,b)=>{ const raw=(b-a)/5, mag=Math.pow(10,Math.floor(Math.log10(raw))), n=raw/mag, st=(n<1.5?1:n<3.5?2:n<7.5?5:10)*mag, o=[]; for(let v=Math.ceil(a/st-1e-9)*st; v<=b+1e-9; v+=st) o.push(+v.toFixed(8)); return o; };
+  const fmt=v=>String(+v.toFixed(2));
+  let o='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="figure">';
+  o+='<defs><clipPath id="cp"><rect x="'+m.l+'" y="'+m.t+'" width="'+(W-m.l-m.r)+'" height="'+(H-m.t-m.b)+'"/></clipPath></defs>';
+  const xt = s.xticks || (s.ticks ? nice(x0,x1).map(v=>[v,fmt(v)]) : []);
+  const yt = s.yticks || (s.ticks ? nice(y0,y1).map(v=>[v,fmt(v)]) : []);
+  if(s.ticks){ xt.forEach(t=>o+='<line class="grid" x1="'+sx(t[0])+'" x2="'+sx(t[0])+'" y1="'+m.t+'" y2="'+(H-m.b)+'"/>'); yt.forEach(t=>o+='<line class="grid" y1="'+sy(t[0])+'" y2="'+sy(t[0])+'" x1="'+m.l+'" x2="'+(W-m.r)+'"/>'); }
+  if(y0<0&&y1>0) o+='<line class="grid" style="stroke-dasharray:3 4;stroke:var(--muted)" x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+sy(0)+'" y2="'+sy(0)+'"/>';
+  o+='<path class="ax" d="M'+m.l+' '+m.t+'V'+(H-m.b)+'H'+(W-m.r)+'"/>';
+  xt.forEach(t=>o+='<line class="ax" x1="'+sx(t[0])+'" x2="'+sx(t[0])+'" y1="'+(H-m.b)+'" y2="'+(H-m.b+5)+'"/><text x="'+sx(t[0])+'" y="'+(H-m.b+19)+'" text-anchor="middle">'+t[1]+'</text>');
+  yt.forEach(t=>o+='<line class="ax" y1="'+sy(t[0])+'" y2="'+sy(t[0])+'" x1="'+(m.l-5)+'" x2="'+m.l+'"/><text x="'+(m.l-9)+'" y="'+(sy(t[0])+4)+'" text-anchor="end">'+t[1]+'</text>');
+  if(s.xl) o+='<text x="'+((m.l+W-m.r)/2)+'" y="'+(H-6)+'" text-anchor="middle" style="font-style:italic">'+esc(s.xl)+'</text>';
+  if(s.yl) o+='<text transform="translate(14 '+((m.t+H-m.b)/2)+') rotate(-90)" text-anchor="middle" style="font-style:italic">'+esc(s.yl)+'</text>';
+  (s.hlines||[]).forEach(l=>o+='<line class="ax" style="stroke-dasharray:'+(l.dash?'5 5':'none')+';opacity:.55" x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+sy(l.y)+'" y2="'+sy(l.y)+'"/>');
+  (s.vlines||[]).forEach(l=>o+='<line class="ax" style="stroke-dasharray:'+(l.dash?'5 5':'none')+';opacity:.55" y1="'+m.t+'" y2="'+(H-m.b)+'" x1="'+sx(l.x)+'" x2="'+sx(l.x)+'"/>');
+  o+='<g clip-path="url(#cp)">';
+  const labels=[];
+  (s.curves||[]).forEach(c=>{
+    const col='var(--c-'+(c.c||'ink')+')', N=600; let d='', started=false, f;
+    if(c.fn){ f=mk(c.fn,'x'); for(let i=0;i<=N;i++){ const x=x0+(x1-x0)*i/N, y=f(x); if(!isFinite(y)){started=false;continue;} d+=(started?'L':'M')+sx(x).toFixed(1)+' '+sy(y).toFixed(1); started=true; } }
+    else if(c.fx){ f=mk(c.fx,'y'); for(let i=0;i<=N;i++){ const y=y0+(y1-y0)*i/N, x=f(y); if(!isFinite(x)){started=false;continue;} d+=(started?'L':'M')+sx(x).toFixed(1)+' '+sy(y).toFixed(1); started=true; } }
+    o+='<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+(c.lw||2.6)+'" stroke-linecap="round" stroke-linejoin="round"'+(c.dash?' stroke-dasharray="7 6"':'')+'/>';
+    if(c.lab){ let lx,ly; if(c.fn){ lx=c.labx!=null?c.labx:x0+(x1-x0)*0.9; ly=f(lx)+(c.laby||0); } else { ly=c.laby!=null?c.laby:y0+(y1-y0)*0.5; lx=f(ly)+(c.labx||0); } labels.push('<text class="lab" x="'+sx(lx)+'" y="'+sy(ly)+'" fill="'+col+'" style="fill:'+col+'" text-anchor="middle">'+esc(c.lab)+'</text>'); }
+  });
+  (s.pts||[]).forEach(p=>{
+    const filled=p.fill===true?'var(--c-ink)':(p.fill==='n'?'var(--card)':'none');
+    o+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="6" fill="'+filled+'" stroke="var(--c-ink)" stroke-width="2"/>';
+    if(p.lab) labels.push('<text class="lab" x="'+(sx(p.x)+11)+'" y="'+(sy(p.y)-10)+'">'+esc(p.lab)+'</text>');
+  });
+  o+=labels.join('')+'</g></svg>';
+  return o;
+}
+const figHTML = q => q.fig ? '<div class="fig">'+plot(q.fig)+'</div>' : '';
+
+/* ====================================================================
+   ROUTING
+   ==================================================================== */
+let route = {name:'home'};
+function go(r){ cleanup(); route=r; render(); window.scrollTo(0,0); }
+function cleanup(){ if(route.name==='host') hostLeave(); if(route.name==='live') studentLeave(); document.onkeydown=null; }
+function bootRoute(){
+  const qs = new URLSearchParams(location.search);
+  if(qs.get('join')) { route={name:'live', code:qs.get('join').toUpperCase().replace(/[^A-Z0-9]/g,'')}; }
+  else if(location.hash==='#host' || qs.has('host')) { route={name:'host'}; }
+  else route={name:'home'};
+  render();
+}
+function render(){
+  document.body.classList.remove('hide-cursor');
+  if(route.name==='home') viewHome();
+  else if(route.name==='practice') viewPractice();
+  else if(route.name==='live') viewLive();
+  else if(route.name==='host') viewHost();
+}
+function header(extra){
+  return '<div class="top'+(extra?' compact':'')+'"><div class="brand" data-act="home"><div class="logo"><svg viewBox="0 0 64 64"><path d="M8 44 C20 44 20 18 32 18 S44 44 56 44" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg></div><span class="bt">'+esc(TITLE)+' Quiz</span></div><div class="grow"></div>'+(extra||'')+
+    '<button class="btn ghost" data-act="theme" title="Toggle light / dark" aria-label="Toggle theme">'+THEME_ICON+'</button></div>';
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if(!t || t.disabled) return;
+  const act=t.dataset.act, arg=t.dataset.arg;
+  const fn = ACTS[act]; if(fn) fn(arg, t, e);
+});
+const ACTS = {
+  home(){ history.replaceState(null,'',location.pathname); go({name:'home'}); },
+  theme(){ const cur=document.documentElement.getAttribute('data-theme'); const dark=window.matchMedia('(prefers-color-scheme: dark)').matches; const next=(cur?cur==='dark':dark)?'light':'dark'; document.documentElement.setAttribute('data-theme',next); LS.set('sbq.theme',next); },
+  practice(){ go({name:'practice', stage:'setup'}); },
+  host(){ history.replaceState(null,'',location.pathname+'#host'); go({name:'host'}); },
+  joinGo(){ const v=(document.getElementById('code').value||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if(v.length<3){ document.getElementById('code').focus(); return; } history.replaceState(null,'',location.pathname+'?join='+v); go({name:'live', code:v}); },
+};
+const THEME_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>';
+const savedTheme = LS.get('sbq.theme',null); if(savedTheme) document.documentElement.setAttribute('data-theme',savedTheme);
+
+/* ====================================================================
+   HOME
+   ==================================================================== */
+function viewHome(){
+  app.innerHTML = '<div class="wrap">'+header()+
+  '<div class="hero"><h1>'+esc(TITLE)+' — Quiz</h1><p>Exam-style multiple-choice questions on the lecture material, with explanations. Practise on your own, or join the live quiz during the lecture.</p></div>'+
+  '<div class="grid2">'+
+    '<div class="card choice"><h2>Practise on your own</h2><p>'+QUESTIONS.length+' questions across '+lecNums.length+' topics. Pick lectures, get instant feedback and explanations. Your progress stays in this browser.</p><button class="btn primary big" data-act="practice">Start practising</button></div>'+
+    '<div class="card choice"><h2>Join the live quiz</h2><p>Scan the QR code on the screen, or type the room code shown by your lecturer.</p><div class="row"><input id="code" class="codein" maxlength="8" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn primary big" data-act="joinGo">Join</button></div></div>'+
+  '</div>'+
+  '<p class="muted small" style="margin-top:28px">Lecturer? <button class="link" data-act="host">Open presenter view</button></p></div>';
+  const inp=document.getElementById('code'); inp.addEventListener('keydown',e=>{ if(e.key==='Enter') ACTS.joinGo(); });
+}
+
+/* ====================================================================
+   PRACTICE MODE
+   ==================================================================== */
+const PR = LS.get('sbq.practice.prefs', {sel:[1,2,3,4,5,6,7], n:10, focus:false, shuffleQ:true});
+const getProg = () => LS.get('sbq.progress', {});
+function viewPractice(){ if(route.stage==='setup') practiceSetup(); else if(route.stage==='run') practiceRun(); else practiceDone(); }
+
+function practiceSetup(){
+  const prog=getProg();
+  const chips = lecNums.map(n=>{
+    const qs=QUESTIONS.filter(q=>q.lec===n); if(!qs.length) return '';
+    const mastered=qs.filter(q=>prog[q.id]&&prog[q.id].last).length, on=PR.sel.includes(n);
+    return '<button class="chip'+(on?' on':'')+'" data-act="pchip" data-arg="'+n+'"><b>'+esc(lecLabel(n))+'</b><span>'+qs.length+' questions · '+mastered+' answered correctly</span><div class="bar"><i style="width:'+Math.round(100*mastered/qs.length)+'%"></i></div></button>';
+  }).join('');
+  const total = QUESTIONS.filter(q=>PR.sel.includes(q.lec)).length;
+  app.innerHTML='<div class="wrap">'+header()+'<div class="stack"><div><h2>Practice</h2><p class="muted" style="margin:6px 0 0">Choose the lectures you want to be quizzed on.</p></div>'+
+   '<div class="chips">'+chips+'</div>'+
+   '<div class="card stack"><div class="row"><div class="field"><label for="nq">Number of questions</label><select id="nq">'+[5,10,20,0].map(v=>'<option value="'+v+'"'+(PR.n===v?' selected':'')+'>'+(v||'All')+'</option>').join('')+'</select></div></div>'+
+   '<label class="toggle"><input type="checkbox" id="focus"'+(PR.focus?' checked':'')+'><span>Focus on questions I have not seen or got wrong last time</span></label>'+
+   '<div class="row spread"><span class="muted">'+total+' questions available</span><button class="btn primary big" data-act="pstart"'+(total?'':' disabled')+'>Start</button></div></div>'+
+   '<p class="muted small"><button class="link" data-act="presetprog">Reset my progress</button></p></div></div>';
+  document.getElementById('nq').onchange=e=>{PR.n=+e.target.value; LS.set('sbq.practice.prefs',PR);};
+  document.getElementById('focus').onchange=e=>{PR.focus=e.target.checked; LS.set('sbq.practice.prefs',PR);};
+}
+Object.assign(ACTS,{
+  pchip(n){ n=+n; const i=PR.sel.indexOf(n); if(i>=0) PR.sel.splice(i,1); else PR.sel.push(n); LS.set('sbq.practice.prefs',PR); practiceSetup(); },
+  presetprog(){ if(confirm('Delete your saved practice progress in this browser?')){ LS.set('sbq.progress',{}); practiceSetup(); } },
+  pstart(){
+    let pool=QUESTIONS.filter(q=>PR.sel.includes(q.lec)); const prog=getProg();
+    if(PR.focus){ const f=pool.filter(q=>!(prog[q.id]&&prog[q.id].last)); if(f.length>=3) pool=f; }
+    pool=shuffled(pool,Math.random); if(PR.n>0) pool=pool.slice(0,PR.n);
+    route={name:'practice', stage:'run', pool, i:0, res:[], seed:Math.random().toString(36).slice(2), sel:null, checked:false};
+    render(); window.scrollTo(0,0);
+  },
+  psel(i){ if(route.checked) return; route.sel=+i; practiceRun(true); },
+  pcheck(){
+    if(route.sel==null||route.checked) return; const q=route.pool[route.i]; const ok=route.sel===correctOf(q);
+    route.checked=true; route.res.push({id:q.id, ok});
+    const prog=getProg(), p=prog[q.id]||{n:0,c:0}; p.n++; if(ok)p.c++; p.last=ok; prog[q.id]=p; LS.set('sbq.progress',prog);
+    practiceRun(true);
+  },
+  pnext(){ if(route.i+1>=route.pool.length){ route.stage='done'; render(); window.scrollTo(0,0); } else { route.i++; route.sel=null; route.checked=false; practiceRun(); window.scrollTo(0,0); } },
+  pretry(){ const wrong=route.res.filter(r=>!r.ok).map(r=>byId[r.id]); route={name:'practice',stage:'run',pool:shuffled(wrong,Math.random),i:0,res:[],seed:Math.random().toString(36).slice(2),sel:null,checked:false}; render(); },
+  pagain(){ go({name:'practice',stage:'setup'}); },
+});
+
+function practiceRun(keepScroll){
+  const R=route, q=R.pool[R.i], ord=optOrder(q,R.seed), cor=correctOf(q);
+  const opts=ord.map((oi,pos)=>{
+    let cls='opt'; if(R.checked){ if(oi===cor) cls+=' ok'; else if(oi===R.sel) cls+=' bad'; else cls+=' dim'; } else if(R.sel===oi) cls+=' sel';
+    return '<button class="'+cls+'" data-act="psel" data-arg="'+oi+'"'+(R.checked?' disabled':'')+'><span class="k">'+LETTERS[pos]+'</span><span class="t">'+q.opts[oi]+'</span></button>';
+  }).join('');
+  let fb=''; if(R.checked){ const ok=R.sel===cor; fb='<div class="feedback '+(ok?'ok':'bad')+'"><h3>'+(ok?'✓ Correct':'✗ Not quite — correct answer: '+LETTERS[ord.indexOf(cor)])+'</h3><div>'+(q.exp||'')+'</div>'+(q.src?'<div class="src">Modelled on: '+esc(q.src)+'</div>':'')+'</div>'; }
+  const last=R.i+1>=R.pool.length;
+  app.innerHTML='<div class="wrap">'+header('<span class="pill">'+(R.i+1)+' / '+R.pool.length+'</span>')+
+    '<div class="progress" style="margin-bottom:16px"><i style="width:'+Math.round(100*(R.i+(R.checked?1:0))/R.pool.length)+'%"></i></div>'+
+    '<div class="card"><div class="qmeta">'+esc(lecLabel(q.lec))+' · '+esc(q.topic)+'</div><div class="qtext">'+q.q+'</div>'+figHTML(q)+'<div class="opts">'+opts+'</div>'+fb+
+    '<div class="row spread" style="margin-top:18px"><button class="btn ghost" data-act="home">Quit</button>'+
+    (R.checked?'<button class="btn primary big" data-act="pnext">'+(last?'See results':'Next question →')+'</button>':'<button class="btn primary big" data-act="pcheck"'+(R.sel==null?' disabled':'')+'>Check answer</button>')+'</div></div></div>';
+  typeset(app);
+  document.onkeydown=e=>{
+    if(e.ctrlKey||e.metaKey||e.altKey) return;
+    const k=e.key.toUpperCase(), pos=LETTERS.indexOf(k), n=parseInt(e.key,10);
+    if(!R.checked){ const p = pos>=0&&pos<ord.length ? pos : (n>=1&&n<=ord.length ? n-1 : -1); if(p>=0){ ACTS.psel(ord[p]); return; } }
+    if(e.key==='Enter'){ e.preventDefault(); R.checked?ACTS.pnext():ACTS.pcheck(); }
+  };
+}
+function practiceDone(){
+  const R=route, ok=R.res.filter(r=>r.ok).length, tot=R.res.length, wrong=R.res.filter(r=>!r.ok);
+  const pct=Math.round(100*ok/Math.max(1,tot));
+  const items=R.res.map(r=>{const q=byId[r.id]; return '<div class="li '+(r.ok?'ok':'bad')+'"><span class="m">'+(r.ok?'✓':'✗')+'</span><div><b>'+esc(lecLabel(q.lec))+'</b> · '+esc(q.topic)+'</div></div>';}).join('');
+  app.innerHTML='<div class="wrap">'+header()+'<div class="stack"><div class="card" style="text-align:center"><div class="muted">Your result</div><div class="big-score">'+ok+' / '+tot+'</div><div class="muted">'+pct+' % correct</div>'+
+   '<div class="row" style="justify-content:center;margin-top:18px">'+(wrong.length?'<button class="btn primary" data-act="pretry">Retry the '+wrong.length+' I missed</button>':'')+'<button class="btn" data-act="pagain">New session</button><button class="btn ghost" data-act="home">Home</button></div></div>'+
+   '<div class="list">'+items+'</div></div></div>';
+}
+
+/* ====================================================================
+   LIVE: STUDENT
+   ==================================================================== */
+let S=null;
+const sid = () => { let v=LS.get('sbq.sid',null); if(!v){ v=Math.random().toString(36).slice(2,10)+Date.now().toString(36); LS.set('sbq.sid',v);} return v; };
+function viewLive(){
+  S={code:route.code, sid:sid(), peer:null, conn:null, st:null, status:'connecting', sel:null, pendingSince:0, dead:false, retryT:null};
+  studentConnect(); studentPaint();
+}
+function studentLeave(){ if(!S) return; S.dead=true; clearTimeout(S.retryT); clearInterval(S.tick); try{S.conn&&S.conn.close();}catch(e){} try{S.peer&&S.peer.destroy();}catch(e){} document.removeEventListener('visibilitychange',S.vis); S=null; }
+function studentConnect(){
+  if(!S||S.dead) return;
+  if(!window.Peer){ S.status='error'; S.err='The connection library could not be loaded (check your internet connection).'; studentPaint(); S.retryT=setTimeout(()=>{ if(S&&!S.dead) studentConnect(); },4000); return; }
+  S.status='connecting'; S.err=''; studentPaint();
+  try{ S.peer&&S.peer.destroy(); }catch(e){}
+  const me=S, peer=new Peer(undefined, peerOpts()); S.peer=peer;
+  let opened=false;
+  const retry=(msg,delay)=>{ if(me.dead||S!==me) return; if(msg) me.err=msg; me.status='retry'; studentPaint(); clearTimeout(me.retryT); me.retryT=setTimeout(()=>studentConnect(),delay||2500); };
+  peer.on('open',()=>{
+    const conn=peer.connect(PEER_PREFIX+me.code,{reliable:true,serialization:'json'}); me.conn=conn;
+    const to=setTimeout(()=>{ if(!opened){ try{conn.close();}catch(e){} retry('Could not reach the lecturer’s page yet — retrying…',2000);} },12000);
+    conn.on('open',()=>{ opened=true; clearTimeout(to); me.status='on'; me.err=''; conn.send({t:'hello',sid:me.sid,ver:VER}); studentPaint(); });
+    conn.on('data',m=>{ if(m&&m.t==='state') studentState(m); });
+    conn.on('close',()=>{ clearTimeout(to); retry('Connection lost — reconnecting…',1500); });
+    conn.on('error',()=>{ clearTimeout(to); retry('Connection problem — retrying…',2500); });
+  });
+  peer.on('error',e=>{
+    if(e.type==='peer-unavailable') retry('Room “'+me.code+'” not found. Check the code — or the lecturer has not started yet.',3000);
+    else retry('Network problem ('+e.type+') — retrying…',3000);
+  });
+  peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
+  if(!S.vis){ S.vis=()=>{ if(S&&!S.dead&&document.visibilityState==='visible'&&S.status!=='on') { clearTimeout(S.retryT); studentConnect(); } }; document.addEventListener('visibilitychange',S.vis); }
+  if(!S.tick) S.tick=setInterval(()=>{ // resend answer if not acknowledged
+    if(S&&S.status==='on'&&S.pendingSince&&Date.now()-S.pendingSince>3000&&S.sel!=null&&S.st&&S.st.mine==null&&S.st.phase==='q'){ try{S.conn.send({t:'answer',sid:S.sid,qid:S.st.qid,choice:S.sel});}catch(e){} S.pendingSince=Date.now(); }
+  },1000);
+}
+function studentState(m){
+  const prevQ=S.st&&S.st.qid, prevPhase=S.st&&S.st.phase;
+  S.st=m; if(m.qid!==prevQ){ S.sel=null; S.pendingSince=0; window.scrollTo(0,0); }
+  if(m.mine!=null) S.pendingSince=0;
+  studentPaint(m.qid!==prevQ || m.phase!==prevPhase);
+}
+function studentPaint(full){
+  if(!S||route.name!=='live') return;
+  const dotCls = S.status==='on'?'on':(S.status==='error'?'off':'wait');
+  const stxt = S.status==='on'?'Connected':(S.status==='connecting'?'Connecting…':(S.status==='error'?'Error':'Reconnecting…'));
+  let body='';
+  const st=S.st;
+  if(st && st.ver!==VER) body+='<div class="banner">Your page is out of date. Please reload it (pull down, or hard-refresh) to see the current question.</div>';
+  if(S.err && S.status!=='on') body+='<div class="banner warn">'+esc(S.err)+'</div>';
+  if(!st || st.phase==='lobby' || !byId[st.qid]){
+    body+='<div class="card wait"><div class="spin"></div><h2>'+(S.status==='on'?'You’re in!':'Connecting…')+'</h2><p class="muted">'+(S.status==='on'?'Waiting for the lecturer to start the next question…':'Room '+esc(S.code))+'</p></div>';
+  } else {
+    const q=byId[st.qid], ord=optOrder(q,''), cor=correctOf(q), mine=st.mine, locked=mine!=null || (S.pendingSince>0);
+    const reveal=st.phase==='r';
+    const myChoice = mine!=null?mine:S.sel;
+    const counts=st.counts||[], tot=counts.reduce((a,b)=>a+b,0);
+    const opts=ord.map((oi,pos)=>{
+      let cls='opt'+(reveal&&tot?' stat':'');
+      if(reveal){ if(oi===cor) cls+=' ok'; else if(oi===myChoice) cls+=' bad'; else cls+=' dim'; }
+      else if(myChoice===oi) cls+=' sel';
+      const pct=tot?Math.round(100*(counts[oi]||0)/tot):0;
+      return '<button class="'+cls+'" style="--pct:'+pct+'%" data-act="lsel" data-arg="'+oi+'"'+((reveal||locked)?' disabled':'')+'><span class="k">'+LETTERS[pos]+'</span><span class="t">'+q.opts[oi]+'</span>'+(reveal&&tot?'<span class="cnt">'+pct+'%</span>':'')+'</button>';
+    }).join('');
+    let foot='';
+    if(reveal){
+      const ok=mine!=null&&mine===cor, noans=mine==null; const correctN=counts[cor]||0;
+      foot='<div class="feedback '+(noans?'':ok?'ok':'bad')+'"><h3>'+(noans?'No answer submitted':ok?'✓ Correct':'✗ Not quite — correct answer: '+LETTERS[ord.indexOf(cor)])+'</h3>'+(tot?'<div class="muted" style="margin-bottom:8px">'+correctN+' of '+tot+' answers were correct ('+Math.round(100*correctN/tot)+' %)</div>':'')+'<div>'+(q.exp||'')+'</div></div>';
+    } else if(locked){
+      foot='<div class="feedback"><b>✓ Answer '+(mine!=null?'received':'sending…')+'.</b> <span class="muted">Waiting for the lecturer to reveal the solution.</span></div>';
+    } else {
+      foot='<div class="row" style="margin-top:16px"><button class="btn primary big grow" data-act="lsubmit"'+(S.sel==null?' disabled':'')+'>Submit answer</button></div>';
+    }
+    body+='<div class="card"><div class="qmeta">Question '+st.n+' of '+st.N+' · '+esc(q.topic)+'</div><div class="qtext">'+q.q+'</div>'+figHTML(q)+'<div class="opts">'+opts+'</div>'+foot+'</div>';
+  }
+  app.innerHTML='<div class="wrap live">'+header('<span class="status"><i class="dot '+dotCls+'"></i>'+stxt+' · '+esc(S.code)+'</span>')+body+'<p class="muted small" style="margin-top:20px"><button class="link" data-act="home">Leave live quiz</button></p></div>';
+  if(!st||full||true) typeset(app);
+}
+Object.assign(ACTS,{
+  lsel(i){ if(!S||!S.st||S.st.phase!=='q'||S.st.mine!=null||S.pendingSince) return; S.sel=+i; studentPaint(); },
+  lsubmit(){ if(!S||S.sel==null||!S.st||S.st.phase!=='q'||S.status!=='on') return; try{ S.conn.send({t:'answer',sid:S.sid,qid:S.st.qid,choice:S.sel}); S.pendingSince=Date.now(); studentPaint(); }catch(e){} },
+});
+
+/* ====================================================================
+   LIVE: PRESENTER (HOST)
+   ==================================================================== */
+let H=null;
+const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const genCode = () => Array.from({length:5},()=>CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
+const joinURL = () => location.origin+location.pathname+'?join='+H.code;
+function hostLoad(){
+  const sv=LS.get('sbq.host',{})||{};
+  H={ code:sv.code||genCode(), sel:sv.sel||lecNums.slice(), cur:sv.cur||null, phase:sv.phase||'lobby', answers:sv.answers||{},
+      conns:new Map(), peer:null, status:'connecting', ui:{overlay:null, exp:false}, tries:0, dead:false };
+  if(H.phase!=='lobby' && !byId[H.cur]) { H.phase='lobby'; H.cur=null; }
+}
+function hostSave(){ LS.set('sbq.host',{code:H.code, sel:H.sel, cur:H.cur, phase:H.phase, answers:H.answers}); }
+const hostList = () => QUESTIONS.filter(q=>H.sel.includes(q.lec));
+const hostQ = () => H.cur ? byId[H.cur] : null;
+function counts(q){ const a=H.answers[q.id]||{}, c=q.opts.map(()=>0); Object.values(a).forEach(v=>{ if(c[v]!=null) c[v]++; }); return c; }
+function viewHost(){
+  hostLoad(); hostOpenPeer(); hostPaint();
+  document.onkeydown=hostKey;
+  let idle; const wake=()=>{ document.body.classList.remove('hide-cursor'); clearTimeout(idle); idle=setTimeout(()=>{ if(H&&H.phase!=='lobby'&&!H.ui.overlay) document.body.classList.add('hide-cursor'); },3000); };
+  document.onmousemove=wake; H.wake=wake;
+}
+function hostLeave(){ if(!H) return; H.dead=true; clearTimeout(H.retryT); try{H.peer&&H.peer.destroy();}catch(e){} document.onmousemove=null; H=null; }
+function hostOpenPeer(){
+  if(!H||H.dead) return;
+  if(!window.Peer){ H.status='error:lib'; hostStatus(); H.retryT=setTimeout(hostOpenPeer,3000); return; }
+  try{H.peer&&H.peer.destroy();}catch(e){}
+  H.conns.clear(); H.status='connecting'; hostStatus();
+  const me=H, p=new Peer(PEER_PREFIX+H.code, peerOpts()); H.peer=p;
+  p.on('open',()=>{ if(H!==me) return; me.status='open'; me.tries=0; hostStatus(); });
+  p.on('error',e=>{
+    if(H!==me||me.dead) return;
+    if(e.type==='unavailable-id'){ me.status='busy'; hostStatus(); me.retryT=setTimeout(hostOpenPeer, 3500); }
+    else if(e.type==='peer-unavailable'){ /* ignore */ }
+    else { me.status='error:'+e.type; hostStatus(); me.retryT=setTimeout(hostOpenPeer, 5000); }
+  });
+  p.on('disconnected',()=>{ if(H!==me) return; me.status='reconnecting'; hostStatus(); try{p.reconnect();}catch(e){} });
+  p.on('connection',c=>{
+    c.on('data',m=>hostMsg(c,m));
+    c.on('close',()=>{ if(c._sid && me.conns.get(c._sid)===c){ me.conns.delete(c._sid); hostCount(); } });
+    c.on('error',()=>{});
+  });
+}
+function stateFor(s){
+  const q=hostQ(), base={t:'state',ver:VER,code:H.code};
+  if(H.phase==='lobby'||!q) return Object.assign(base,{phase:'lobby'});
+  const a=H.answers[q.id]||{}, list=hostList();
+  const out=Object.assign(base,{phase:H.phase,qid:q.id,n:Math.max(1,list.indexOf(q)+1),N:list.length,mine:(s in a)?a[s]:null});
+  if(H.phase==='r'){ out.counts=counts(q); out.correct=correctOf(q); }
+  return out;
+}
+function sendState(c){ try{ if(c.open) c.send(stateFor(c._sid)); }catch(e){} }
+function broadcast(){ H.conns.forEach(c=>sendState(c)); }
+function hostMsg(c,m){
+  if(!m||!H) return;
+  if(m.t==='hello' && typeof m.sid==='string'){
+    c._sid=m.sid.slice(0,40); const old=H.conns.get(c._sid); if(old&&old!==c){ try{old.close();}catch(e){} }
+    H.conns.set(c._sid,c); sendState(c); hostCount();
+  } else if(m.t==='answer' && c._sid){
+    const q=hostQ(); if(!q||H.phase!=='q'||m.qid!==q.id){ sendState(c); return; }
+    const ch=m.choice; if(!Number.isInteger(ch)||ch<0||ch>=q.opts.length) return;
+    const a=H.answers[q.id]||(H.answers[q.id]={}); if(!(c._sid in a)) a[c._sid]=ch;
+    sendState(c); hostCount(); hostSaveSoon();
+  }
+}
+let saveT; function hostSaveSoon(){ clearTimeout(saveT); saveT=setTimeout(()=>{ if(H) hostSave(); },400); }
+window.addEventListener('pagehide',()=>{ if(H) hostSave(); });
+function hostCount(){
+  if(!H) return; const q=hostQ(); const answered = q? Object.keys(H.answers[q.id]||{}).length : 0;
+  document.querySelectorAll('[data-hc]').forEach(el=>el.textContent=H.conns.size);
+  document.querySelectorAll('[data-ha]').forEach(el=>el.textContent=answered);
+}
+function hostStatus(){
+  const el=document.getElementById('hstat'); if(!el||!H) return;
+  const s=H.status; let txt, cls;
+  if(s==='open'){ txt='Room online'; cls='on'; }
+  else if(s==='connecting'||s==='reconnecting'){ txt='Connecting to the signalling server…'; cls='wait'; }
+  else if(s==='busy'){ txt='Room code still held by a previous page — retrying…'; cls='wait'; }
+  else if(s==='error:lib'){ txt='Connection library not loaded (offline?)'; cls='off'; }
+  else { txt='Connection problem ('+s.replace('error:','')+') — retrying…'; cls='off'; }
+  el.innerHTML='<i class="dot '+cls+'"></i> '+txt;
+}
+function setPhase(ph,id){
+  H.phase=ph; if(id!==undefined) H.cur=id;
+  hostSave(); broadcast(); hostPaint();
+}
+function hostAdvance(){
+  const list=hostList(); if(!list.length) return;
+  if(H.phase==='lobby'){ setPhase('q', H.cur && byId[H.cur] && list.includes(byId[H.cur]) ? H.cur : list[0].id); }
+  else if(H.phase==='q'){ setPhase('r'); }
+  else { const i=list.indexOf(hostQ()); if(i+1<list.length) setPhase('q',list[i+1].id); else { H.ui.overlay='list'; hostPaint(); } }
+  if(H.wake) H.wake();
+}
+function hostBack(){
+  const list=hostList();
+  if(H.phase==='r') setPhase('q');
+  else if(H.phase==='q'){ const i=list.indexOf(hostQ()); if(i>0) setPhase('r',list[i-1].id); else setPhase('lobby'); }
+}
+function hostKey(e){
+  if(!H||e.ctrlKey||e.metaKey||e.altKey) return; const k=e.key;
+  if(H.ui.overlay && k==='Escape'){ H.ui.overlay=null; hostPaint(); return; }
+  if(H.phase==='lobby') { if(k==='Enter'){ hostAdvance(); } return; }
+  if(k===' '||k==='ArrowRight'||k==='Enter'||k==='PageDown'){ e.preventDefault(); if(!H.ui.overlay) hostAdvance(); }
+  else if(k==='ArrowLeft'||k==='PageUp'){ e.preventDefault(); if(!H.ui.overlay) hostBack(); }
+  else if(k==='r'||k==='R'){ if(H.phase==='q') setPhase('r'); }
+  else if(k==='e'||k==='E'){ H.ui.exp=!H.ui.exp; hostPaint(); }
+  else if(k==='q'||k==='Q'){ H.ui.overlay=H.ui.overlay==='qr'?null:'qr'; hostPaint(); }
+  else if(k==='l'||k==='L'||k==='g'||k==='G'){ H.ui.overlay=H.ui.overlay==='list'?null:'list'; hostPaint(); }
+  else if(k==='f'||k==='F'){ ACTS.hfull(); }
+}
+Object.assign(ACTS,{
+  hnext(){ hostAdvance(); }, hprev(){ hostBack(); },
+  hexp(){ H.ui.exp=!H.ui.exp; hostPaint(); },
+  hqr(){ H.ui.overlay='qr'; hostPaint(); },
+  hlist(){ H.ui.overlay='list'; hostPaint(); },
+  hclose(){ H.ui.overlay=null; hostPaint(); },
+  hfull(){ try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){} },
+  hjump(id){ H.ui.overlay=null; setPhase('q',id); },
+  hchip(n){ n=+n; const i=H.sel.indexOf(n); if(i>=0) H.sel.splice(i,1); else H.sel.push(n); H.sel.sort((a,b)=>a-b); hostSave(); hostPaint(); },
+  hlobby(){ H.ui.overlay=null; setPhase('lobby'); },
+  hnewroom(){ if(!confirm('Create a new room code? Students currently connected will have to rejoin, and collected answers are cleared.')) return; H.code=genCode(); H.answers={}; H.cur=null; H.phase='lobby'; hostSave(); hostOpenPeer(); hostPaint(); },
+  hreset(){ if(!confirm('Clear all collected answers of this session?')) return; H.answers={}; hostSave(); broadcast(); hostPaint(); },
+  hcsv(){ hostCSV(); },
+  hcopy(){ try{ navigator.clipboard.writeText(joinURL()); }catch(e){} },
+});
+function hostCSV(){
+  const rows=[['id','lecture','topic','n_answers','n_correct','pct_correct','correct_option_(original_index)']];
+  const maxO=Math.max.apply(null,QUESTIONS.map(q=>q.opts.length)); for(let i=0;i<maxO;i++) rows[0].push('count_option_'+i);
+  QUESTIONS.forEach(q=>{ if(!H.answers[q.id]) return; const c=counts(q), n=c.reduce((a,b)=>a+b,0); if(!n) return; const k=c[correctOf(q)]; rows.push([q.id,q.lec,q.topic,n,k,(100*k/n).toFixed(1),correctOf(q)].concat(c)); });
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='live-quiz-results-'+new Date().toISOString().slice(0,10)+'.csv'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function qrSvg(text){
+  if(!window.qrcode) return '<div style="padding:40px;color:#444;line-height:1.3">QR code library not loaded.<br>Share the link instead.</div>';
+  const qr=qrcode(0,'M'); qr.addData(text); qr.make(); const n=qr.getModuleCount(); let d='';
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(qr.isDark(r,c)) d+='M'+(c+4)+','+(r+4)+'h1v1h-1z';
+  return '<svg viewBox="0 0 '+(n+8)+' '+(n+8)+'" shape-rendering="crispEdges" role="img" aria-label="QR code to join"><rect width="100%" height="100%" fill="#fff"/><path d="'+d+'" fill="#000"/></svg>';
+}
+function hostPaint(){
+  if(!H||route.name!=='host') return;
+  const q=hostQ(), list=hostList(), url=joinURL();
+  const fileWarn = location.protocol==='file:' ? '<div class="banner" style="margin:0 0 12px">This page was opened from a local file. Students cannot reach it — publish it (e.g. GitHub Pages) and open that address, otherwise the QR code will not work.</div>' : '';
+  let html='';
+  if(H.phase==='lobby' || !q){
+    const chips=lecNums.map(n=>{ const c=QUESTIONS.filter(x=>x.lec===n).length; if(!c) return ''; return '<button class="chip'+(H.sel.includes(n)?' on':'')+'" data-act="hchip" data-arg="'+n+'"><b>'+esc(lecLabel(n))+'</b><span>'+c+' questions</span></button>'; }).join('');
+    html='<div class="proj"><div class="ph"><span class="brand" data-act="home" style="font-size:1em">'+esc(TITLE)+' · Live quiz</span><span class="sp"></span><span id="hstat" class="status"></span><button class="btn ghost" data-act="theme" aria-label="Toggle theme">'+THEME_ICON+'</button></div>'+
+      '<div class="lobby"><div>'+fileWarn+'<div class="qrbox">'+qrSvg(url)+'</div></div>'+
+      '<div class="stack" style="min-width:0"><div class="muted">Scan the QR code, or go to</div><div class="joinurl">'+esc(location.host+location.pathname.replace(/index\.html$/,''))+'</div><div class="muted">and enter the code</div><div class="code">'+H.code+'</div>'+
+      '<div><span class="bigcount" data-hc>'+H.conns.size+'</span> <span class="muted">connected</span></div>'+
+      '<div><div class="muted small" style="margin-bottom:8px">Questions to ask in this session</div><div class="chips">'+chips+'</div></div>'+
+      '<div class="row"><button class="btn primary big" data-act="hnext"'+(list.length?'':' disabled')+'>'+(q?'Resume':'Start')+' quiz ▶ <span class="small" style="opacity:.8">('+list.length+' questions)</span></button><button class="btn ghost" data-act="hnewroom">New room code</button><button class="btn ghost" data-act="hcopy">Copy link</button></div></div></div></div>';
+  } else {
+    const idx=list.indexOf(q)+1, rev=H.phase==='r', cs=counts(q), tot=cs.reduce((a,b)=>a+b,0), cor=correctOf(q), ord=optOrder(q,'');
+    const opts=ord.map((oi,pos)=>{
+      let cls='opt'; if(rev){ cls+=' stat'+(oi===cor?' ok':' dim'); }
+      const pct=tot?Math.round(100*cs[oi]/tot):0;
+      return '<div class="'+cls+'" style="--pct:'+pct+'%"><span class="k">'+LETTERS[pos]+'</span><span class="t">'+q.opts[oi]+'</span>'+(rev?'<span class="cnt">'+cs[oi]+' · '+pct+'%</span>':'')+'</div>';
+    }).join('');
+    let tally=''; if(rev){ const k=cs[cor], w=tot-k, noans=Math.max(0,H.conns.size-tot); tally='<div class="tally"><span class="ok">✓ '+k+' correct'+(tot?' ('+Math.round(100*k/tot)+' %)':'')+'</span><span class="bad">✗ '+w+' wrong'+(tot?' ('+Math.round(100*w/tot)+' %)':'')+'</span>'+(noans?'<span class="no">'+noans+' no answer</span>':'')+'</div>'; }
+    const exp = rev && H.ui.exp ? '<div class="feedback" style="margin-top:18px"><div>'+(q.exp||'')+'</div>'+(q.src?'<div class="src">Modelled on: '+esc(q.src)+'</div>':'')+'</div>' : '';
+    html='<div class="proj"><div class="ph"><span class="lec">'+esc(lecLabel(q.lec))+'</span><span class="muted">·</span><span>Question '+idx+' / '+list.length+'</span><span class="sp"></span>'+
+      '<span id="hstat" class="status"></span><span class="pill">'+(rev?'Results':'<span data-ha>0</span> answered')+' · <span data-hc>'+H.conns.size+'</span> online</span></div>'+
+      '<div class="pm'+(q.fig?' hasfig':'')+'"><div><div class="qtext">'+q.q+'</div><div class="opts">'+opts+'</div>'+tally+exp+'</div>'+(q.fig?figHTML(q):'')+'</div>'+
+      '<div class="pf"><span class="info">Join: <b>'+esc(location.host+location.pathname.replace(/index\.html$/,''))+'</b> · code <b>'+H.code+'</b></span>'+
+      '<button class="btn" data-act="hprev" title="← Back">◀</button>'+
+      '<button class="btn primary" data-act="hnext" title="Space / →">'+(rev?(idx<list.length?'Next question ▶':'Finish'):'Reveal answer')+'</button>'+
+      (rev?'<button class="btn" data-act="hexp" title="E">'+(H.ui.exp?'Hide':'Show')+' explanation</button>':'')+
+      '<button class="btn" data-act="hlist" title="L">Questions</button><button class="btn" data-act="hqr" title="Q">QR code</button><button class="btn" data-act="hfull" title="F">⛶</button><button class="btn ghost" data-act="theme" aria-label="Toggle theme">'+THEME_ICON+'</button></div></div>';
+  }
+  // overlays
+  if(H.ui.overlay==='qr'){
+    html+='<div class="overlay" data-act="hclose"><div class="modal" style="text-align:center" onclick="event.stopPropagation()"><div class="qrbox">'+qrSvg(url)+'</div><div class="code" style="margin-top:14px">'+H.code+'</div><div class="joinurl" style="margin-top:8px">'+esc(url)+'</div></div></div>';
+  } else if(H.ui.overlay==='list'){
+    const cur=hostQ();
+    const items=list.map(x=>{ const a=H.answers[x.id], n=a?Object.keys(a).length:0; let st=''; if(n){ const c=counts(x); st=Math.round(100*c[correctOf(x)]/n)+' % of '+n; }
+      return '<button class="qli'+(cur&&cur.id===x.id?' cur':'')+'" data-act="hjump" data-arg="'+x.id+'"><span class="id">'+x.id+'</span><span class="tp">'+esc(x.topic)+'</span><span class="st">'+st+'</span></button>'; }).join('');
+    const chips=lecNums.map(n=>{ const c=QUESTIONS.filter(x=>x.lec===n).length; return c?'<button class="chip'+(H.sel.includes(n)?' on':'')+'" style="min-width:0;flex:0 1 auto;padding:6px 10px" data-act="hchip" data-arg="'+n+'"><b>'+(n===7?'More':'L'+n)+'</b></button>':''; }).join('');
+    html+='<div class="overlay" data-act="hclose"><div class="modal" onclick="event.stopPropagation()"><div class="row spread" style="margin-bottom:12px"><h2>Questions</h2><div class="row"><button class="btn" data-act="hcsv">Download results (CSV)</button><button class="btn" data-act="hlobby">Lobby / QR</button><button class="btn primary" data-act="hclose">Close</button></div></div><div class="chips" style="margin-bottom:12px">'+chips+'</div><div class="qlist">'+items+'</div><p class="muted small" style="margin-top:14px"><button class="link" data-act="hreset">Clear collected answers</button></p></div></div>';
+  }
+  app.innerHTML=html; hostStatus(); hostCount(); typeset(app);
+}
+
+/* ====================================================================
+   START
+   ==================================================================== */
+const start=()=>iceReady.then(bootRoute);
+if(document.readyState==='loading') window.addEventListener('DOMContentLoaded', start); else start();
+window.addEventListener('popstate', ()=>{ cleanup(); bootRoute(); });
+})();
+</script>
+</body>
+</html>

@@ -684,6 +684,7 @@ const QUESTIONS = [
 /* ====================================================================
    SETTINGS  (edit here)
    ==================================================================== */
+const BUILD        = '2026-10-27 09:44';                // version stamp (shown at the bottom of the pages)
 const TITLE        = 'Systems Biology';          // shown in the header
 const PEER_PREFIX  = 'sysbio-quiz-';             // prefix of the room id on the public PeerJS broker
 const ICE_SERVERS  = [                            // STUN servers (add a TURN server here if campus Wi-Fi blocks peer-to-peer)
@@ -695,7 +696,12 @@ const ICE_SERVERS  = [                            // STUN servers (add a TURN se
 ];
 // TURN relay (makes live mode work across restrictive networks). Option A: fixed credentials here:
 const TURN_SERVERS = [
-  // {urls:'turn:turn.example.org:443?transport=tcp', username:'USER', credential:'PASSWORD'},
+  // Metered relay (free plan, 500 MB/month). Replace with your own credentials if you ever rotate them.
+  {urls:'stun:stun.relay.metered.ca:80'},
+  {urls:'turn:global.relay.metered.ca:80', username:'8effb68e5617d215d0f3f8a1', credential:'cdvMyrh5ZNC87i4w'},
+  {urls:'turn:global.relay.metered.ca:80?transport=tcp', username:'8effb68e5617d215d0f3f8a1', credential:'cdvMyrh5ZNC87i4w'},
+  {urls:'turn:global.relay.metered.ca:443', username:'8effb68e5617d215d0f3f8a1', credential:'cdvMyrh5ZNC87i4w'},
+  {urls:'turns:global.relay.metered.ca:443?transport=tcp', username:'8effb68e5617d215d0f3f8a1', credential:'cdvMyrh5ZNC87i4w'},
 ];
 // Option B: a URL that returns a JSON array of iceServers (e.g. Metered: 'https://YOURAPP.metered.live/api/v1/turn/credentials?apiKey=YOURKEY')
 const TURN_CREDENTIALS_URL = '';
@@ -830,7 +836,7 @@ function viewHome(){
     '<div class="card choice"><h2>Practise on your own</h2><p>'+QUESTIONS.length+' questions across '+lecNums.length+' topics. Pick lectures, get instant feedback and explanations. Your progress stays in this browser.</p><button class="btn primary big" data-act="practice">Start practising</button></div>'+
     '<div class="card choice"><h2>Join the live quiz</h2><p>Scan the QR code on the screen, or type the room code shown by your lecturer.</p><div class="row"><input id="code" class="codein" maxlength="8" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn primary big" data-act="joinGo">Join</button></div></div>'+
   '</div>'+
-  '<p class="muted small" style="margin-top:28px">Lecturer? <button class="link" data-act="host">Open presenter view</button></p></div>';
+  '<p class="muted small" style="margin-top:28px">Lecturer? <button class="link" data-act="host">Open presenter view</button></p><p class="muted small">Version '+esc(BUILD)+'</p></div>';
   const inp=document.getElementById('code'); inp.addEventListener('keydown',e=>{ if(e.key==='Enter') ACTS.joinGo(); });
 }
 
@@ -988,7 +994,7 @@ function studentPaint(full){
     }
     body+='<div class="card"><div class="qmeta">Question '+st.n+' of '+st.N+' · '+esc(q.topic)+'</div><div class="qtext">'+q.q+'</div>'+figHTML(q)+'<div class="opts">'+opts+'</div>'+foot+'</div>';
   }
-  app.innerHTML='<div class="wrap live">'+header('<span class="status"><i class="dot '+dotCls+'"></i>'+stxt+' · '+esc(S.code)+'</span>')+body+'<p class="muted small" style="margin-top:20px"><button class="link" data-act="home">Leave live quiz</button></p></div>';
+  app.innerHTML='<div class="wrap live">'+header('<span class="status"><i class="dot '+dotCls+'"></i>'+stxt+' · '+esc(S.code)+'</span>')+body+'<p class="muted small" style="margin-top:20px"><button class="link" data-act="home">Leave live quiz</button> · version '+esc(BUILD)+'</p></div>';
   if(!st||full||true) typeset(app);
 }
 Object.assign(ACTS,{
@@ -1160,7 +1166,7 @@ function hostPaint(){
     html='<div class="proj"><div class="ph"><span class="lec">'+esc(lecLabel(q.lec))+'</span><span class="muted">·</span><span>Question '+idx+' / '+list.length+'</span><span class="sp"></span>'+
       '<span id="hstat" class="status"></span><span class="pill">'+(rev?'Results':'<span data-ha>0</span> answered')+' · <span data-hc>'+H.conns.size+'</span> online</span></div>'+
       '<div class="pm'+(q.fig?' hasfig':'')+'"><div><div class="qtext">'+q.q+'</div><div class="opts">'+opts+'</div>'+tally+exp+'</div>'+(q.fig?figHTML(q):'')+'</div>'+
-      '<div class="pf"><span class="info">Join: <b>'+esc(location.host+location.pathname.replace(/index\.html$/,''))+'</b> · code <b>'+H.code+'</b></span>'+
+      '<div class="pf"><span class="info">v'+esc(BUILD)+' · Join: <b>'+esc(location.host+location.pathname.replace(/index\.html$/,''))+'</b> · code <b>'+H.code+'</b></span>'+
       '<button class="btn" data-act="hprev" title="← Back">◀</button>'+
       '<button class="btn primary" data-act="hnext" title="Space / →">'+(rev?(idx<list.length?'Next question ▶':'Finish'):'Reveal answer')+'</button>'+
       (rev?'<button class="btn" data-act="hexp" title="E">'+(H.ui.exp?'Hide':'Show')+' explanation</button>':'')+

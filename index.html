@@ -928,9 +928,12 @@ function studentConnect(){
   const me=S, peer=new Peer(undefined, peerOpts()); S.peer=peer;
   let opened=false;
   const retry=(msg,delay)=>{ if(me.dead||S!==me) return; if(msg) me.err=msg; me.status='retry'; studentPaint(); clearTimeout(me.retryT); me.retryT=setTimeout(()=>studentConnect(),delay||2500); };
+  me.stage=1;
+  const sigT=setTimeout(()=>{ if(S===me && me.stage===1 && !me.dead){ try{peer.destroy();}catch(e){} retry('Step 1 failed: cannot reach the PeerJS connection service (0.peerjs.com). A VPN, content blocker, private DNS or the network may be blocking it. Try another network or browser.',4000); } },10000);
   peer.on('open',()=>{
+    clearTimeout(sigT); me.stage=2; studentPaint();
     const conn=peer.connect(PEER_PREFIX+me.code,{reliable:true,serialization:'json'}); me.conn=conn;
-    const to=setTimeout(()=>{ if(!opened){ try{conn.close();}catch(e){} retry('Could not reach the lecturer’s page yet — retrying…',2000);} },12000);
+    const to=setTimeout(()=>{ if(!opened){ try{conn.close();}catch(e){} retry('Step 2 failed: the connection service works, but no direct or relayed path to the lecturer’s page could be set up. Likely causes: both devices behind the same router/hotspot, a firewall, or no TURN relay. Check the room code and that the lecturer page says “Room online”.',2000);} },12000);
     conn.on('open',()=>{ opened=true; clearTimeout(to); me.status='on'; me.err=''; conn.send({t:'hello',sid:me.sid,ver:VER}); studentPaint(); });
     conn.on('data',m=>{ if(m&&m.t==='state') studentState(m); });
     conn.on('close',()=>{ clearTimeout(to); retry('Connection lost — reconnecting…',1500); });
@@ -961,7 +964,7 @@ function studentPaint(full){
   if(st && st.ver!==VER) body+='<div class="banner">Your page is out of date. Please reload it (pull down, or hard-refresh) to see the current question.</div>';
   if(S.err && S.status!=='on') body+='<div class="banner warn">'+esc(S.err)+'</div>';
   if(!st || st.phase==='lobby' || !byId[st.qid]){
-    body+='<div class="card wait"><div class="spin"></div><h2>'+(S.status==='on'?'You’re in!':'Connecting…')+'</h2><p class="muted">'+(S.status==='on'?'Waiting for the lecturer to start the next question…':'Room '+esc(S.code))+'</p></div>';
+    body+='<div class="card wait"><div class="spin"></div><h2>'+(S.status==='on'?'You’re in!':'Connecting…')+'</h2><p class="muted">'+(S.status==='on'?'Waiting for the lecturer to start the next question…':'Room '+esc(S.code)+'<br>'+(S.stage===2?'Step 2 of 2: contacting the lecturer’s page…':'Step 1 of 2: reaching the connection service…'))+'</p></div>';
   } else {
     const q=byId[st.qid], ord=optOrder(q,''), cor=correctOf(q), mine=st.mine, locked=mine!=null || (S.pendingSince>0);
     const reveal=st.phase==='r';
@@ -1070,7 +1073,7 @@ function hostStatus(){
   const el=document.getElementById('hstat'); if(!el||!H) return;
   const s=H.status; let txt, cls;
   if(s==='open'){ txt='Room online'; cls='on'; }
-  else if(s==='connecting'||s==='reconnecting'){ txt='Connecting to the signalling server…'; cls='wait'; }
+  else if(s==='connecting'||s==='reconnecting'){ txt='Connecting to the PeerJS service… (if this stays: the network blocks 0.peerjs.com)'; cls='wait'; }
   else if(s==='busy'){ txt='Room code still held by a previous page — retrying…'; cls='wait'; }
   else if(s==='error:lib'){ txt='Connection library not loaded (offline?)'; cls='off'; }
   else { txt='Connection problem ('+s.replace('error:','')+') — retrying…'; cls='off'; }

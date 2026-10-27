@@ -21,6 +21,7 @@ The page loads KaTeX (math), the MQTT client and a QR generator from the jsDeliv
    * **Lectures** – which lectures the questions come from.
    * **Random selection** – pick how many (3, 5, 8, … or all); *Draw again* gives a new random set; *Prefer questions not asked yet* skips questions that already have answers from earlier sessions. *Edit by hand* turns the current draw into a manual selection you can adjust.
    * **Pick questions myself** – tick individual questions (each shows its topic and question text; "all"/"none" per lecture).
+   * **Difficulty** – easy / medium / hard (each question is rated 1–3; see below).
    * **Order** – lecture order or shuffled.
 
    The lobby shows a one-line summary (e.g. "8 questions · random draw from L2, L3"). The setup is remembered by the browser. → **Start quiz**. You can also change the selection mid-session from the question list (`L` → *Change questions…*); answers already collected are kept.
@@ -60,10 +61,13 @@ All questions are in one block at the top of `index.html` (search for `QUESTION 
   src:'Exam HS25 Q3a' }                              // optional
 ```
 
+* `diff` is the difficulty: 1 = easy (recall), 2 = medium (apply a concept / short calculation), 3 = hard (multi-step reasoning). It is shown with each question (●○○ to ●●●) and can be used as a filter in practice mode and in the presenter's question setup.
 * The **first option is always the correct one**; options are shuffled automatically (same order for everyone in a live session). Use `fixed:true, ans:<index>` to keep your own order.
 * Math: `$…$` inline, `$$…$$` display (KaTeX). Write `\lt` / `\gt` instead of `<` / `>` inside math. Always wrap texts in r`…` so backslashes work.
 * `id` must be unique and should never change (progress and live sessions refer to it). `lec` is 1–6 (7 = "More exam topics"; names are in `LECTURES`).
 * Figures: add `fig:{ x:[0,5], y:[0,3], curves:[{fn:'1-exp(-x)', c:'a'}], … }` — see the existing questions for examples (curves `fn` = y(x) or `fx` = x(y), points, dashed lines, labels).
+* Network diagrams: `fig:{ net:true, nodes:{X:[200,38], Y:[330,108]}, edges:[{a:'X', b:'Y', t:'+'}] }` (`t`: `'+'` activation, `'-'` repression, `'f'` dashed removal arrow; `a===b` draws a self-loop). For a standard feed-forward loop use the helper `ffl('-', 'AND')`. `fig` may also be a list of several figures.
+* Every question must stand on its own (they are shuffled) — never refer to "the previous question".
 * In the live session, students and presenter must run the same version of the page; if a student has an old cached copy they are told to reload.
 
 ## Notes on content

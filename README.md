@@ -3,7 +3,7 @@
 One self-contained `index.html`: 79 multiple-choice questions (Lectures 1–6 + "More exam topics"), two modes.
 
 * **Practice** – students pick lectures, answer, get instant feedback + explanation. Progress is kept in their browser only.
-* **Live** – you project the *presenter view*, students scan the QR code and answer on their phones, you reveal the solution and the class result (correct / wrong / per-option bars) is shown on the screen. Answers travel peer-to-peer (WebRTC, via the free public PeerJS signalling server) — no account, no backend of your own, no student data stored anywhere.
+* **Live** – you project the *presenter view*, students scan the QR code and answer on their phones, you reveal the solution and the class result (correct / wrong / per-option bars) is shown on the screen. Messages travel through free public MQTT message brokers (HiveMQ and EMQX) — no account, no backend of your own, nothing to install. Students are anonymous (random browser id); answers are stored only in the presenter's browser.
 
 ## Put it on GitHub Pages (5 minutes)
 
@@ -12,7 +12,7 @@ One self-contained `index.html`: 79 multiple-choice questions (Lectures 1–6 + 
 3. After a minute the site is at `https://<your-user>.github.io/sysbio-quiz/`.
 
 Student link: that address. Presenter view: that address + `#host`  (e.g. `https://<user>.github.io/sysbio-quiz/#host`).
-The page loads KaTeX (math), PeerJS and a QR generator from the jsDelivr CDN, so students need internet (they have it on their phones anyway).
+The page loads KaTeX (math), the MQTT client and a QR generator from the jsDelivr CDN, so students need internet (they have it on their phones anyway).
 
 ## Running a live session
 
@@ -30,21 +30,23 @@ The page loads KaTeX (math), PeerJS and a QR generator from the jsDelivr CDN, so
 Keyboard shortcuts (presenter): `Space`/`→` next step, `←` back, `R` reveal, `E` show/hide explanation, `L` question list (jump to any question, download results as CSV), `Q` big QR code, `F` fullscreen.
 If you reload the presenter page, the session (position and collected answers) is restored and students reconnect automatically. Keep the presenter tab open during the lecture.
 
-**Test it once on the lecture-hall Wi-Fi before the first live lecture.** Peer-to-peer connections can be blocked by campus firewalls (typically when presenter and students are on different networks, e.g. eduroam vs. mobile data). The page uses a Metered TURN relay (entries in `TURN_SERVERS`) plus PeerJS' public relay as fallback when direct connections fail.
+**Test it once on the lecture-hall Wi-Fi before the first live lecture** (scan the QR code with your phone on eduroam and on mobile data).
 
-### Adding a TURN relay
-Near the top of the script (search for `TURN_SERVERS`) there are two settings, use one of them:
+### How the live connection works
+The presenter page connects to **all** brokers listed in `BROKERS` (near the top of the script) and mirrors every message to each of them; each student phone uses the first broker it can reach. So a session keeps working as long as each phone reaches at least one of them. The presenter status line says *Room online*, or *Room online (1 of 2 message services reachable)* if one broker is down.
 
-* **Fixed credentials** (own coturn server, or a provider that gives you a static user/password):
-  `const TURN_SERVERS = [ {urls:'turn:turn.example.org:443?transport=tcp', username:'USER', credential:'PASSWORD'} ];`
-* **Credentials URL** (e.g. Metered's free tier: create an app, copy the "credentials API" URL with your API key):
-  `const TURN_CREDENTIALS_URL = 'https://YOURAPP.metered.live/api/v1/turn/credentials?apiKey=YOURKEY';`
+Student page messages: *Step 1 of 2* = reaching a message service (fails only if the network blocks ports 8884/8084 of both brokers – try mobile data); *Step 2 of 2* = waiting for the presenter page (check the room code / that the presenter page is open and says *Room online*).
 
-The relay must be reachable from the students' phones and your laptop; a TURN entry on port 443 over TCP/TLS gets through most strict firewalls.
+Notes: the brokers are public, so anyone who knows a room code could in principle read or send messages in that room (no personal data is involved; answers are anonymous). To use your own broker (e.g. Mosquitto on a university VM with WebSockets over TLS), add its address to `BROKERS`, e.g. `'wss://mqtt.example.org:443/mqtt'`.
 
-**Check that it works:** add `?relay` to the addresses to force relay-only connections. Presenter: `https://…/?relay#host`, student: `https://…/?join=CODE&relay`. If the quiz still connects, the relay works.
+## Practice statistics
 
-**Test without any relay:** add `?norelay` instead (presenter: `https://…/?norelay#host`). Then only direct connections are tried — useful to check whether a network (e.g. eduroam in the lecture hall) works without the relay. The QR code shown by the presenter page carries the flag, so students who scan it are in the same test mode; the status line shows "test mode: no relay" / "test mode: relay only". Without either flag (normal use) direct connections are tried first and the relay is only used when they fail.
+Open `https://<your-site>/#stats` (also linked from the presenter lobby). It shows anonymous totals from the self-study mode: page visits, practice sessions started, number of answered questions and % correct — overall, per lecture and per question (sortable, e.g. lowest % correct first). Live sessions are not included (use the CSV export there), and the repeat round of wrongly answered questions is not counted.
+
+* No login, no cookies, no personal data: each answer just increments two counters (`answered`, `correct`) at the free counting service Abacus (abacus.jasoncameron.dev), namespace `STATS_NS` near the top of the script.
+* Loading the page takes about a minute (the service allows ~30 requests per 10 s; one request per counter). The last result is cached in your browser.
+* Limits: counters unused for 6 months expire; anyone who knows the namespace could tamper with the numbers; if many students practise at the same time behind one IP address (e.g. a computer lab), some counts may be dropped by the rate limit. Treat the numbers as indicative.
+* Switch counting off with `const STATS_NS = '';` — or change the name to start counting from zero (e.g. per semester).
 
 ## Editing / adding questions
 

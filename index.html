@@ -146,6 +146,21 @@ select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);backgroun
 .banner{background:var(--bad-soft);border:1px solid var(--bad);color:var(--bad);padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:600}
 .banner.warn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 
+/* statistics */
+.st-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.st-tile{padding:14px 16px}
+.st-big{font-size:1.9rem;font-weight:800;letter-spacing:-.02em}
+.st-h{margin:26px 0 10px}
+.st-tbl{padding:6px 10px;overflow-x:auto}
+.st-tbl table{border-collapse:collapse;width:100%;font-size:.92rem}
+.st-tbl th,.st-tbl td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.st-tbl tr:last-child td{border-bottom:0}
+.st-tbl th{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.st-tbl .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.st-tbl .mono{font:600 .82rem ui-monospace,monospace;color:var(--muted);white-space:nowrap}
+.st-bar{width:120px;margin:0}
+@media (max-width:560px){.st-bar{width:60px}}
+
 /* session setup */
 .sumbox{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .sumtxt{font-size:1.05rem}
@@ -215,7 +230,7 @@ select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);backgroun
 
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 
 <script>
@@ -708,46 +723,28 @@ const QUESTIONS = [
 /* ====================================================================
    SETTINGS  (edit here)
    ==================================================================== */
-const BUILD        = '2026-10-27 10:43';                // version stamp (shown at the bottom of the pages)
+const BUILD        = '2026-10-27 12:11';                // version stamp (shown at the bottom of the pages)
 const TITLE        = 'Systems Biology';          // shown in the header
-const PEER_PREFIX  = 'sysbio-quiz-';             // prefix of the room id on the public PeerJS broker
-const ICE_SERVERS  = [                            // STUN servers (add a TURN server here if campus Wi-Fi blocks peer-to-peer)
-  {urls:'stun:stun.l.google.com:19302'},
-  {urls:'stun:stun1.l.google.com:19302'},
-  {urls:'stun:global.stun.twilio.com:3478'},
-  // PeerJS' own public relay (the library default, shared & best-effort, UDP 3478 only). Add your own TURN below for reliability.
-  {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'], username:'peerjs', credential:'peerjsp'}
-];
-// TURN relay (makes live mode work across restrictive networks). Option A: fixed credentials here:
-const TURN_SERVERS = [
-  // Metered relay (free plan, 500 MB/month). Replace with your own credentials if you ever rotate them.
-  {urls:'stun:stun.relay.metered.ca:80'},
-  {urls:'turn:global.relay.metered.ca:80', username:'8effb68e5617d215d0f3f8a1', credential:'cdvMyrh5ZNC87i4w'},
-  {urls:'turn:global.relay.metered.ca:80?transport=tcp', username:'8effb68e5617d215d0f3f8a1', credential:'cdvMyrh5ZNC87i4w'},
-  {urls:'turn:global.relay.metered.ca:443', username:'8effb68e5617d215d0f3f8a1', credential:'cdvMyrh5ZNC87i4w'},
-  {urls:'turns:global.relay.metered.ca:443?transport=tcp', username:'8effb68e5617d215d0f3f8a1', credential:'cdvMyrh5ZNC87i4w'},
-];
-// Option B: a URL that returns a JSON array of iceServers (e.g. Metered: 'https://YOURAPP.metered.live/api/v1/turn/credentials?apiKey=YOURKEY')
-const TURN_CREDENTIALS_URL = '';
-// Advanced: self-hosted PeerJS server -> define window.SBQ_PEER = {host:'...', port:443, path:'/', secure:true} before this script.
-let ICE_LIVE = ICE_SERVERS.concat(TURN_SERVERS);
-// ?norelay = test mode without any TURN relay (STUN only, direct connections);  ?relay = relay only (tests the TURN server)
-const QS = new URLSearchParams(location.search), NORELAY = QS.has('norelay'), FORCERELAY = QS.has('relay') && !NORELAY;
-const isTurn = s => [].concat(s.urls).some(u => /^turns?:/.test(u));
-const iceReady = (async () => {
-  if(!TURN_CREDENTIALS_URL || NORELAY) return;
-  try{ const ctl=new AbortController(), t=setTimeout(()=>ctl.abort(),4000);
-       const r=await fetch(TURN_CREDENTIALS_URL,{signal:ctl.signal}); clearTimeout(t); const j=await r.json();
-       if(Array.isArray(j)) ICE_LIVE = ICE_SERVERS.concat(TURN_SERVERS, j); }catch(e){}
-})();
-// add ?relay to the address (students: ?join=CODE&relay, presenter: ?relay#host) to force relay-only and thereby test the TURN server
-const peerOpts = () => Object.assign({debug:1, config:{iceServers:NORELAY ? ICE_SERVERS.filter(s=>!isTurn(s)) : ICE_LIVE, iceTransportPolicy:FORCERELAY?'relay':'all'}}, window.SBQ_PEER || {});
-const relayTag = NORELAY ? ' · test mode: no relay' : FORCERELAY ? ' · test mode: relay only' : '';
+// LIVE MODE TRANSPORT: messages travel through free public MQTT brokers (MQTT over secure WebSocket, no account needed).
+// The presenter page connects to ALL brokers in the list; each student uses the first one that works.
+// You can add or replace entries with your own broker, e.g. 'wss://mqtt.example.org:443/mqtt'.
+const BROKERS      = window.SBQ_BROKERS || ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt'];
+const TOPIC_PREFIX = 'sysbio-quiz/v1/';          // topics: <prefix><ROOMCODE>/state|host|p|a|s/<student>
+const topic = (code, t) => TOPIC_PREFIX + code + '/' + t;
+const enc = o => JSON.stringify(o);
+const dec = b => { try{ return JSON.parse(typeof b==='string' ? b : new TextDecoder().decode(b)); }catch(e){ return null; } };
+// ANONYMOUS USAGE COUNTERS (practice mode only): just totals — page visits, practice sessions started, and per question how often it
+// was answered and how often correctly. No personal data, no cookies. Uses the free Abacus counting service (abacus.jasoncameron.dev).
+// View the numbers at <site>/#stats .  Set STATS_NS = '' to switch counting off.
+const STATS_URL = window.SBQ_STATS || 'https://abacus.jasoncameron.dev';
+const STATS_NS  = 'sbq-towbinlab-unibe';
+const hostOf = u => { try{ return new URL(u).host; }catch(e){ return u; } };
 
 /* ====================================================================
    HELPERS
    ==================================================================== */
 const app = document.getElementById('app');
+function count(key){ if(!STATS_NS) return; try{ fetch(STATS_URL+'/hit/'+STATS_NS+'/'+key,{keepalive:true}).catch(()=>{}); }catch(e){} }
 const LS = {
   get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -825,7 +822,9 @@ function bootRoute(){
   const qs = new URLSearchParams(location.search);
   if(qs.get('join')) { route={name:'live', code:qs.get('join').toUpperCase().replace(/[^A-Z0-9]/g,'')}; }
   else if(location.hash==='#host' || qs.has('host')) { route={name:'host'}; }
+  else if(location.hash==='#stats') { route={name:'stats'}; }
   else route={name:'home'};
+  if(route.name==='home' && !bootRoute.counted){ bootRoute.counted=true; count('visits'); }
   render();
 }
 function render(){
@@ -834,6 +833,7 @@ function render(){
   else if(route.name==='practice') viewPractice();
   else if(route.name==='live') viewLive();
   else if(route.name==='host') viewHost();
+  else if(route.name==='stats') viewStats();
 }
 function header(extra){
   return '<div class="top'+(extra?' compact':'')+'"><div class="brand" data-act="home"><div class="logo"><svg viewBox="0 0 64 64"><path d="M8 44 C20 44 20 18 32 18 S44 44 56 44" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg></div><span class="bt">'+esc(TITLE)+' Quiz</span></div><div class="grow"></div>'+(extra||'')+
@@ -901,17 +901,19 @@ Object.assign(ACTS,{
     if(PR.focus){ const f=pool.filter(q=>!(prog[q.id]&&prog[q.id].last)); if(f.length>=3) pool=f; }
     pool=shuffled(pool,Math.random); if(PR.n>0) pool=pool.slice(0,PR.n);
     route={name:'practice', stage:'run', pool, i:0, res:[], seed:Math.random().toString(36).slice(2), sel:null, checked:false};
+    count('sessions');
     render(); window.scrollTo(0,0);
   },
   psel(i){ if(route.checked) return; route.sel=+i; practiceRun(true); },
   pcheck(){
     if(route.sel==null||route.checked) return; const q=route.pool[route.i]; const ok=route.sel===correctOf(q);
     route.checked=true; route.res.push({id:q.id, ok});
+    if(!route.retry){ count('q.'+q.id+'.n'); if(ok) count('q.'+q.id+'.ok'); }   // anonymous totals (retry rounds not counted)
     const prog=getProg(), p=prog[q.id]||{n:0,c:0}; p.n++; if(ok)p.c++; p.last=ok; prog[q.id]=p; LS.set('sbq.progress',prog);
     practiceRun(true);
   },
   pnext(){ if(route.i+1>=route.pool.length){ route.stage='done'; render(); window.scrollTo(0,0); } else { route.i++; route.sel=null; route.checked=false; practiceRun(); window.scrollTo(0,0); } },
-  pretry(){ const wrong=route.res.filter(r=>!r.ok).map(r=>byId[r.id]); route={name:'practice',stage:'run',pool:shuffled(wrong,Math.random),i:0,res:[],seed:Math.random().toString(36).slice(2),sel:null,checked:false}; render(); },
+  pretry(){ const wrong=route.res.filter(r=>!r.ok).map(r=>byId[r.id]); route={name:'practice',stage:'run',pool:shuffled(wrong,Math.random),i:0,res:[],seed:Math.random().toString(36).slice(2),sel:null,checked:false,retry:true}; render(); },
   pagain(){ go({name:'practice',stage:'setup'}); },
 });
 
@@ -951,41 +953,65 @@ function practiceDone(){
 let S=null;
 const sid = () => { let v=LS.get('sbq.sid',null); if(!v){ v=Math.random().toString(36).slice(2,10)+Date.now().toString(36); LS.set('sbq.sid',v);} return v; };
 function viewLive(){
-  S={code:route.code, sid:sid(), peer:null, conn:null, st:null, status:'connecting', sel:null, pendingSince:0, dead:false, retryT:null};
+  S={code:route.code, sid:sid(), cl:null, st:null, mine:{}, rv:null, hostOn:null, status:'connecting', stage:1, sel:null, pendingSince:0, dead:false, retryT:null, bi:0, lastPing:0};
   studentConnect(); studentPaint();
 }
-function studentLeave(){ if(!S) return; S.dead=true; clearTimeout(S.retryT); clearInterval(S.tick); try{S.conn&&S.conn.close();}catch(e){} try{S.peer&&S.peer.destroy();}catch(e){} document.removeEventListener('visibilitychange',S.vis); S=null; }
+function studentLeave(){
+  if(!S) return; S.dead=true; clearTimeout(S.retryT); clearTimeout(S.hostT); clearInterval(S.tick);
+  try{ if(S.cl){ if(S.cl.connected) S.cl.publish(topic(S.code,'p'),enc({t:'bye',sid:S.sid,cid:S.cid})); S.cl.end(); } }catch(e){}
+  document.removeEventListener('visibilitychange',S.vis); S=null;
+}
+function spub(t,o,qos){ try{ if(S&&S.cl&&S.cl.connected){ S.cl.publish(topic(S.code,t),enc(o),{qos:qos||0}); return true; } }catch(e){} return false; }
+function studentUpd(){
+  if(!S) return; const c=S.cl&&S.cl.connected;
+  S.status = c ? (S.hostOn ? 'on' : 'wait') : (S.everConnected ? 'retry' : 'connecting');
+  S.stage = c ? 2 : 1;
+  if(S.status==='on') S.err='';
+}
+function studentHello(){ if(spub('p',{t:'hello',sid:S.sid,cid:S.cid,ver:VER},1)) S.lastPing=Date.now(); }
 function studentConnect(){
   if(!S||S.dead) return;
-  if(!window.Peer){ S.status='error'; S.err='The connection library could not be loaded (check your internet connection).'; studentPaint(); S.retryT=setTimeout(()=>{ if(S&&!S.dead) studentConnect(); },4000); return; }
-  S.status='connecting'; S.err=''; studentPaint();
-  try{ S.peer&&S.peer.destroy(); }catch(e){}
-  const me=S, peer=new Peer(undefined, peerOpts()); S.peer=peer;
-  let opened=false;
-  const retry=(msg,delay)=>{ if(me.dead||S!==me) return; if(msg) me.err=msg; me.status='retry'; studentPaint(); clearTimeout(me.retryT); me.retryT=setTimeout(()=>studentConnect(),delay||2500); };
-  me.stage=1;
-  const sigT=setTimeout(()=>{ if(S===me && me.stage===1 && !me.dead){ try{peer.destroy();}catch(e){} retry('Step 1 failed: cannot reach the PeerJS connection service (0.peerjs.com). A VPN, content blocker, private DNS or the network may be blocking it. Try another network or browser.',4000); } },10000);
-  peer.on('open',()=>{
-    clearTimeout(sigT); me.stage=2; studentPaint();
-    const conn=peer.connect(PEER_PREFIX+me.code,{reliable:true,serialization:'json'}); me.conn=conn;
-    const to=setTimeout(()=>{ if(!opened){ try{conn.close();}catch(e){} retry('Step 2 failed: the connection service works, but no direct or relayed path to the lecturer’s page could be set up. Likely causes: both devices behind the same router/hotspot, a firewall, or no TURN relay. Check the room code and that the lecturer page says “Room online”.',2000);} },12000);
-    conn.on('open',()=>{ opened=true; clearTimeout(to); me.status='on'; me.err=''; conn.send({t:'hello',sid:me.sid,ver:VER}); studentPaint(); });
-    conn.on('data',m=>{ if(m&&m.t==='state') studentState(m); });
-    conn.on('close',()=>{ clearTimeout(to); retry('Connection lost — reconnecting…',1500); });
-    conn.on('error',()=>{ clearTimeout(to); retry('Connection problem — retrying…',2500); });
+  if(!window.mqtt){ S.status='error'; S.err='The connection library could not be loaded (check your internet connection).'; studentPaint(); S.retryT=setTimeout(()=>{ if(S&&!S.dead) studentConnect(); },4000); return; }
+  const me=S; try{ me.cl&&me.cl.end(true); }catch(e){}
+  if(me.bi>=BROKERS.length) me.bi=0;
+  const url=BROKERS[me.bi]; let first=false, failed=false; me.cid=Math.random().toString(36).slice(2,8);
+  me.everConnected=false; studentUpd(); studentPaint();
+  const cl=mqtt.connect(url,{clientId:'sbq_'+me.sid.slice(0,12)+'_'+Math.random().toString(36).slice(2,7), clean:true, keepalive:30,
+    connectTimeout:7000, reconnectPeriod:0, protocolVersion:4, will:{topic:topic(me.code,'p'), payload:enc({t:'bye',sid:me.sid,cid:me.cid}), qos:0, retain:false}});
+  me.cl=cl;
+  const fail=()=>{
+    if(first||failed||S!==me||me.dead||me.cl!==cl) return; failed=true; clearTimeout(t1); try{cl.end(true);}catch(e){}
+    me.bi++;
+    if(me.bi<BROKERS.length) studentConnect();
+    else { me.bi=0; me.err='Step 1 failed: cannot reach the message service ('+BROKERS.map(hostOf).join(', ')+'). The network may block it — try mobile data or another Wi-Fi.'; studentPaint(); clearTimeout(me.retryT); me.retryT=setTimeout(studentConnect,4000); }
+  };
+  const t1=setTimeout(fail,9000);
+  cl.on('connect',()=>{
+    if(S!==me||me.cl!==cl) return; first=true; me.everConnected=true; clearTimeout(t1); cl.options.reconnectPeriod=2000;
+    cl.subscribe([topic(me.code,'state'),topic(me.code,'host'),topic(me.code,'s/'+me.sid)],{qos:1});
+    studentHello(); studentUpd(); studentPaint();
+    clearTimeout(me.hostT);
+    me.hostT=setTimeout(()=>{ if(S===me && me.hostOn!==true){ me.err='Step 2: connected to the message service, but the lecturer’s page for room “'+me.code+'” is not online. Check the code, or wait until the lecturer opens the page.'; studentPaint(); } },6000);
   });
-  peer.on('error',e=>{
-    if(e.type==='peer-unavailable') retry('Room “'+me.code+'” not found. Check the code — or the lecturer has not started yet.',3000);
-    else retry('Network problem ('+e.type+') — retrying…',3000);
+  cl.on('message',(t,b)=>{
+    if(S!==me) return; const m=dec(b), k=t.slice(topic(me.code,'').length);
+    if(k==='host'){ const was=me.hostOn; me.hostOn=!!(m&&m.on); if(me.hostOn&&!was) studentHello(); studentUpd(); studentPaint(true); }
+    else if(k==='state'){ if(m) studentState(m); }
+    else if(k==='s/'+me.sid){ if(m&&m.qid){ if(m.mine!=null) me.mine[m.qid]=m.mine; if(me.st&&me.st.qid===m.qid&&m.mine!=null){ me.st.mine=m.mine; me.pendingSince=0; studentPaint(); } } }
   });
-  peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
-  if(!S.vis){ S.vis=()=>{ if(S&&!S.dead&&document.visibilityState==='visible'&&S.status!=='on') { clearTimeout(S.retryT); studentConnect(); } }; document.addEventListener('visibilitychange',S.vis); }
-  if(!S.tick) S.tick=setInterval(()=>{ // resend answer if not acknowledged
-    if(S&&S.status==='on'&&S.pendingSince&&Date.now()-S.pendingSince>3000&&S.sel!=null&&S.st&&S.st.mine==null&&S.st.phase==='q'){ try{S.conn.send({t:'answer',sid:S.sid,qid:S.st.qid,choice:S.sel});}catch(e){} S.pendingSince=Date.now(); }
+  cl.on('close',()=>{ if(!first){ fail(); return; } if(S===me){ studentUpd(); if(me.status!=='on'){ me.err='Connection lost — reconnecting…'; } studentPaint(); } });
+  cl.on('error',()=>{ if(!first) fail(); });
+  if(!S.vis){ S.vis=()=>{ if(S&&!S.dead&&document.visibilityState==='visible'&&!(S.cl&&S.cl.connected)){ clearTimeout(S.retryT); if(S.everConnected){ try{S.cl.reconnect();}catch(e){ studentConnect(); } } else studentConnect(); } }; document.addEventListener('visibilitychange',S.vis); }
+  if(!S.tick) S.tick=setInterval(()=>{
+    if(!S) return; const now=Date.now();
+    if(S.status==='on'&&S.pendingSince&&now-S.pendingSince>3000&&S.sel!=null&&S.st&&S.st.mine==null&&S.st.phase==='q'){ spub('a',{sid:S.sid,qid:S.st.qid,choice:S.sel},1); S.pendingSince=now; }
+    if(now-S.lastPing>20000 && spub('p',{t:'ping',sid:S.sid,cid:S.cid})) S.lastPing=now;   // presence heartbeat
   },1000);
 }
 function studentState(m){
   const prevQ=S.st&&S.st.qid, prevPhase=S.st&&S.st.phase;
+  if(m.rv!==S.rv){ if(S.rv!=null) S.mine={}; S.rv=m.rv; }        // lecturer cleared the answers
+  m.mine = (m.qid && S.mine[m.qid]!=null) ? S.mine[m.qid] : null;
   S.st=m; if(m.qid!==prevQ){ S.sel=null; S.pendingSince=0; window.scrollTo(0,0); }
   if(m.mine!=null) S.pendingSince=0;
   studentPaint(m.qid!==prevQ || m.phase!==prevPhase);
@@ -993,13 +1019,13 @@ function studentState(m){
 function studentPaint(full){
   if(!S||route.name!=='live') return;
   const dotCls = S.status==='on'?'on':(S.status==='error'?'off':'wait');
-  const stxt = S.status==='on'?'Connected':(S.status==='connecting'?'Connecting…':(S.status==='error'?'Error':'Reconnecting…'));
+  const stxt = S.status==='on'?'Connected':(S.status==='connecting'?'Connecting…':(S.status==='wait'?'Waiting for lecturer':(S.status==='error'?'Error':'Reconnecting…')));
   let body='';
   const st=S.st;
   if(st && st.ver!==VER) body+='<div class="banner">Your page is out of date. Please reload it (pull down, or hard-refresh) to see the current question.</div>';
   if(S.err && S.status!=='on') body+='<div class="banner warn">'+esc(S.err)+'</div>';
-  if(!st || st.phase==='lobby' || !byId[st.qid]){
-    body+='<div class="card wait"><div class="spin"></div><h2>'+(S.status==='on'?'You’re in!':'Connecting…')+'</h2><p class="muted">'+(S.status==='on'?'Waiting for the lecturer to start the next question…':'Room '+esc(S.code)+esc(relayTag)+'<br>'+(S.stage===2?'Step 2 of 2: contacting the lecturer’s page…':'Step 1 of 2: reaching the connection service…'))+'</p></div>';
+  if(!st || !S.hostOn || st.phase==='lobby' || !byId[st.qid]){
+    body+='<div class="card wait"><div class="spin"></div><h2>'+(S.status==='on'?'You’re in!':'Connecting…')+'</h2><p class="muted">'+(S.status==='on'?'Waiting for the lecturer to start the next question…':'Room '+esc(S.code)+'<br>'+(S.stage===2?'Step 2 of 2: waiting for the lecturer’s page…':'Step 1 of 2: reaching the message service…'))+'</p></div>';
   } else {
     const q=byId[st.qid], ord=optOrder(q,''), cor=correctOf(q), mine=st.mine, locked=mine!=null || (S.pendingSince>0);
     const reveal=st.phase==='r';
@@ -1028,7 +1054,7 @@ function studentPaint(full){
 }
 Object.assign(ACTS,{
   lsel(i){ if(!S||!S.st||S.st.phase!=='q'||S.st.mine!=null||S.pendingSince) return; S.sel=+i; studentPaint(); },
-  lsubmit(){ if(!S||S.sel==null||!S.st||S.st.phase!=='q'||S.status!=='on') return; try{ S.conn.send({t:'answer',sid:S.sid,qid:S.st.qid,choice:S.sel}); S.pendingSince=Date.now(); studentPaint(); }catch(e){} },
+  lsubmit(){ if(!S||S.sel==null||!S.st||S.st.phase!=='q'||S.status!=='on') return; if(spub('a',{sid:S.sid,qid:S.st.qid,choice:S.sel},1)){ S.pendingSince=Date.now(); studentPaint(); } },
 });
 
 /* ====================================================================
@@ -1037,18 +1063,18 @@ Object.assign(ACTS,{
 let H=null;
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const genCode = () => Array.from({length:5},()=>CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
-const joinURL = () => location.origin+location.pathname+'?join='+H.code+(NORELAY?'&norelay':FORCERELAY?'&relay':'');
+const joinURL = () => location.origin+location.pathname+'?join='+H.code;
 const bankIdx={}; QUESTIONS.forEach((q,i)=>bankIdx[q.id]=i);
 const N_CHOICES=[3,5,8,10,12,15,20,0];
 function hostLoad(){
   const sv=LS.get('sbq.host',{})||{};
   const c=Object.assign({sel:sv.sel||lecNums.slice(), mode:'random', n:8, order:'lec', fresh:true, picks:[], drawn:[], seed:Math.random().toString(36).slice(2)}, sv.cfg||{});
   H={ code:sv.code||genCode(), cfg:c, plan:Array.isArray(sv.plan)?sv.plan.filter(id=>byId[id]):null, cur:sv.cur||null, phase:sv.phase||'lobby', answers:sv.answers||{},
-      conns:new Map(), peer:null, status:'connecting', ui:{overlay:null, exp:false}, tries:0, dead:false };
+      rv:sv.rv||1, pres:new Map(), cls:[], status:'connecting', ui:{overlay:null, exp:false}, dead:false };
   if(!H.plan || !H.plan.length) buildPlan(false);
   if(H.phase!=='lobby' && !byId[H.cur]) { H.phase='lobby'; H.cur=null; }
 }
-function hostSave(){ LS.set('sbq.host',{code:H.code, cfg:H.cfg, plan:H.plan, cur:H.cur, phase:H.phase, answers:H.answers}); }
+function hostSave(){ LS.set('sbq.host',{code:H.code, cfg:H.cfg, plan:H.plan, cur:H.cur, phase:H.phase, answers:H.answers, rv:H.rv}); }
 const hostPool = () => QUESTIONS.filter(q=>H.cfg.sel.includes(q.lec));
 const asked = id => !!(H.answers[id] && Object.keys(H.answers[id]).length);
 /* Session plan = ordered list of question ids.  random: draw n from the selected lectures (unasked first if cfg.fresh);
@@ -1076,70 +1102,84 @@ const hostList = () => H.plan.map(id=>byId[id]).filter(Boolean);
 const hostQ = () => H.cur ? byId[H.cur] : null;
 function counts(q){ const a=H.answers[q.id]||{}, c=q.opts.map(()=>0); Object.values(a).forEach(v=>{ if(c[v]!=null) c[v]++; }); return c; }
 function viewHost(){
-  hostLoad(); hostOpenPeer(); hostPaint();
+  hostLoad(); hostConnect(); hostPaint(); H.cntT=setInterval(hostCount,5000);
   document.onkeydown=hostKey;
   let idle; const wake=()=>{ document.body.classList.remove('hide-cursor'); clearTimeout(idle); idle=setTimeout(()=>{ if(H&&H.phase!=='lobby'&&!H.ui.overlay) document.body.classList.add('hide-cursor'); },3000); };
   document.onmousemove=wake; H.wake=wake;
 }
-function hostLeave(){ if(!H) return; H.dead=true; clearTimeout(H.retryT); try{H.peer&&H.peer.destroy();}catch(e){} document.onmousemove=null; H=null; }
-function hostOpenPeer(){
-  if(!H||H.dead) return;
-  if(!window.Peer){ H.status='error:lib'; hostStatus(); H.retryT=setTimeout(hostOpenPeer,3000); return; }
-  try{H.peer&&H.peer.destroy();}catch(e){}
-  H.conns.clear(); H.status='connecting'; hostStatus();
-  const me=H, p=new Peer(PEER_PREFIX+H.code, peerOpts()); H.peer=p;
-  p.on('open',()=>{ if(H!==me) return; me.status='open'; me.tries=0; hostStatus(); });
-  p.on('error',e=>{
-    if(H!==me||me.dead) return;
-    if(e.type==='unavailable-id'){ me.status='busy'; hostStatus(); me.retryT=setTimeout(hostOpenPeer, 3500); }
-    else if(e.type==='peer-unavailable'){ /* ignore */ }
-    else { me.status='error:'+e.type; hostStatus(); me.retryT=setTimeout(hostOpenPeer, 5000); }
-  });
-  p.on('disconnected',()=>{ if(H!==me) return; me.status='reconnecting'; hostStatus(); try{p.reconnect();}catch(e){} });
-  p.on('connection',c=>{
-    c.on('data',m=>hostMsg(c,m));
-    c.on('close',()=>{ if(c._sid && me.conns.get(c._sid)===c){ me.conns.delete(c._sid); hostCount(); } });
-    c.on('error',()=>{});
-  });
+function hostLeave(){ if(!H) return; H.dead=true; clearInterval(H.cntT); hostClose(false); document.onmousemove=null; H=null; }
+function hostClose(clear){
+  const code=H.code;
+  H.cls.forEach(cl=>{ try{
+    if(cl.connected){
+      if(clear){ cl.publish(topic(code,'state'),'',{qos:1,retain:true}); cl.publish(topic(code,'host'),'',{qos:1,retain:true}); }
+      else cl.publish(topic(code,'host'),enc({on:false}),{qos:1,retain:true});
+    }
+    cl.end(false);
+  }catch(e){} });
+  H.cls=[];
 }
-function stateFor(s){
-  const q=hostQ(), base={t:'state',ver:VER,code:H.code};
+function hpub(t,o,retain){ H.cls.forEach(cl=>{ try{ if(cl.connected) cl.publish(topic(H.code,t),enc(o),{qos:1,retain:!!retain}); }catch(e){} }); }
+function hostConnect(){
+  if(!H||H.dead) return;
+  if(!window.mqtt){ H.status='error:lib'; hostStatus(); setTimeout(hostConnect,3000); return; }
+  const me=H, code=H.code;
+  H.cls=BROKERS.map(url=>{
+    const cl=mqtt.connect(url,{clientId:'sbqh_'+code+'_'+Math.random().toString(36).slice(2,8), clean:true, keepalive:30, connectTimeout:8000, reconnectPeriod:3000,
+      protocolVersion:4, will:{topic:topic(code,'host'), payload:enc({on:false}), qos:1, retain:true}});
+    cl.on('connect',()=>{
+      if(H!==me||me.code!==code) return;
+      cl.subscribe([topic(code,'p'),topic(code,'a')],{qos:1});
+      cl.publish(topic(code,'host'),enc({on:true,ver:VER}),{qos:1,retain:true});
+      cl.publish(topic(code,'state'),enc(commonState()),{qos:1,retain:true});
+      hostStatus();
+    });
+    cl.on('message',(t,b)=>{ if(H===me&&me.code===code) hostMsg(t.slice(topic(code,'').length), dec(b)); });
+    ['close','offline','error','reconnect'].forEach(ev=>cl.on(ev,()=>{ if(H===me) hostStatus(); }));
+    return cl;
+  });
+  hostStatus();
+}
+function commonState(){
+  const q=hostQ(), base={t:'state',ver:VER,code:H.code,rv:H.rv};
   if(H.phase==='lobby'||!q) return Object.assign(base,{phase:'lobby'});
-  const a=H.answers[q.id]||{}, list=hostList();
-  const out=Object.assign(base,{phase:H.phase,qid:q.id,n:Math.max(1,list.indexOf(q)+1),N:list.length,mine:(s in a)?a[s]:null});
+  const list=hostList(), out=Object.assign(base,{phase:H.phase,qid:q.id,n:Math.max(1,list.indexOf(q)+1),N:list.length});
   if(H.phase==='r'){ out.counts=counts(q); out.correct=correctOf(q); }
   return out;
 }
-function sendState(c){ try{ if(c.open) c.send(stateFor(c._sid)); }catch(e){} }
-function broadcast(){ H.conns.forEach(c=>sendState(c)); }
-function hostMsg(c,m){
-  if(!m||!H) return;
-  if(m.t==='hello' && typeof m.sid==='string'){
-    c._sid=m.sid.slice(0,40); const old=H.conns.get(c._sid); if(old&&old!==c){ try{old.close();}catch(e){} }
-    H.conns.set(c._sid,c); sendState(c); hostCount();
-  } else if(m.t==='answer' && c._sid){
-    const q=hostQ(); if(!q||H.phase!=='q'||m.qid!==q.id){ sendState(c); return; }
+function personal(s){ const q=hostQ(); if(!q) return; const a=H.answers[q.id]||{}; hpub('s/'+s,{qid:q.id, mine:(s in a)?a[s]:null}); }
+function broadcast(){ hpub('state',commonState(),true); }
+const presentCount = () => { if(!H) return 0; const lim=Date.now()-50000; let n=0; H.pres.forEach(e=>{ if(e.t>lim) n++; }); return n; };
+function hostMsg(k,m){
+  if(!m||!H||typeof m.sid!=='string') return;
+  const s=m.sid.slice(0,40);
+  if(k==='p'){
+    const e=H.pres.get(s); if(m.t==='bye'){ if(e&&e.cid===m.cid) H.pres.delete(s); } else H.pres.set(s,{t:Date.now(),cid:m.cid});
+    if(m.t==='hello') personal(s);
+    hostCount();
+  } else if(k==='a'){
+    const e=H.pres.get(s); H.pres.set(s,{t:Date.now(),cid:e?e.cid:m.cid});
+    const q=hostQ(); if(!q||H.phase!=='q'||m.qid!==q.id){ personal(s); return; }
     const ch=m.choice; if(!Number.isInteger(ch)||ch<0||ch>=q.opts.length) return;
-    const a=H.answers[q.id]||(H.answers[q.id]={}); if(!(c._sid in a)) a[c._sid]=ch;
-    sendState(c); hostCount(); hostSaveSoon();
+    const a=H.answers[q.id]||(H.answers[q.id]={}); if(!(s in a)) a[s]=ch;
+    personal(s); hostCount(); hostSaveSoon();
   }
 }
 let saveT; function hostSaveSoon(){ clearTimeout(saveT); saveT=setTimeout(()=>{ if(H) hostSave(); },400); }
 window.addEventListener('pagehide',()=>{ if(H) hostSave(); });
 function hostCount(){
   if(!H) return; const q=hostQ(); const answered = q? Object.keys(H.answers[q.id]||{}).length : 0;
-  document.querySelectorAll('[data-hc]').forEach(el=>el.textContent=H.conns.size);
+  document.querySelectorAll('[data-hc]').forEach(el=>el.textContent=presentCount());
   document.querySelectorAll('[data-ha]').forEach(el=>el.textContent=answered);
 }
 function hostStatus(){
   const el=document.getElementById('hstat'); if(!el||!H) return;
-  const s=H.status; let txt, cls;
-  if(s==='open'){ txt='Room online'; cls='on'; }
-  else if(s==='connecting'||s==='reconnecting'){ txt='Connecting to the PeerJS service… (if this stays: the network blocks 0.peerjs.com)'; cls='wait'; }
-  else if(s==='busy'){ txt='Room code still held by a previous page — retrying…'; cls='wait'; }
-  else if(s==='error:lib'){ txt='Connection library not loaded (offline?)'; cls='off'; }
-  else { txt='Connection problem ('+s.replace('error:','')+') — retrying…'; cls='off'; }
-  el.innerHTML='<i class="dot '+cls+'"></i> '+txt+esc(relayTag);
+  const n=H.cls.filter(c=>c.connected).length, N=BROKERS.length; let txt, cls;
+  if(H.status==='error:lib'&&!window.mqtt){ txt='Connection library not loaded (offline?)'; cls='off'; }
+  else if(n===N){ txt='Room online'; cls='on'; }
+  else if(n>0){ txt='Room online ('+n+' of '+N+' message services reachable)'; cls='on'; }
+  else { txt='Connecting to the message service… (if this stays: the network blocks '+BROKERS.map(hostOf).join(' and ')+')'; cls='wait'; }
+  el.innerHTML='<i class="dot '+cls+'"></i> '+txt;
 }
 function setPhase(ph,id){
   H.phase=ph; if(id!==undefined) H.cur=id;
@@ -1191,8 +1231,8 @@ Object.assign(ACTS,{
   htopick(){ H.cfg.picks=H.plan.slice(); H.cfg.mode='pick'; planChanged(false); },
   hsetupdone(){ H.ui.overlay=null; hostPaint(); },
   hlobby(){ H.ui.overlay=null; setPhase('lobby'); },
-  hnewroom(){ if(!confirm('Create a new room code? Students currently connected will have to rejoin, and collected answers are cleared.')) return; H.code=genCode(); H.answers={}; H.cur=null; H.phase='lobby'; hostSave(); hostOpenPeer(); hostPaint(); },
-  hreset(){ if(!confirm('Clear all collected answers of this session?')) return; H.answers={}; hostSave(); broadcast(); hostPaint(); },
+  hnewroom(){ if(!confirm('Create a new room code? Students currently connected will have to rejoin, and collected answers are cleared.')) return; hostClose(true); H.code=genCode(); H.answers={}; H.pres.clear(); H.cur=null; H.phase='lobby'; hostSave(); hostConnect(); hostPaint(); },
+  hreset(){ if(!confirm('Clear all collected answers of this session?')) return; H.answers={}; H.rv=(H.rv||1)+1; hostSave(); broadcast(); hostPaint(); },
   hcsv(){ hostCSV(); },
   hcopy(){ try{ navigator.clipboard.writeText(joinURL()); }catch(e){} },
 });
@@ -1218,9 +1258,9 @@ function hostPaint(){
     html='<div class="proj"><div class="ph"><span class="brand" data-act="home" style="font-size:1em">'+esc(TITLE)+' · Live quiz</span><span class="sp"></span><span id="hstat" class="status"></span><button class="btn ghost" data-act="theme" aria-label="Toggle theme">'+THEME_ICON+'</button></div>'+
       '<div class="lobby"><div>'+fileWarn+'<div class="qrbox">'+qrSvg(url)+'</div></div>'+
       '<div class="stack" style="min-width:0"><div class="muted">Scan the QR code, or go to</div><div class="joinurl">'+esc(location.host+location.pathname.replace(/index\.html$/,''))+'</div><div class="muted">and enter the code</div><div class="code">'+H.code+'</div>'+
-      '<div><span class="bigcount" data-hc>'+H.conns.size+'</span> <span class="muted">connected</span></div>'+
+      '<div><span class="bigcount" data-hc>'+presentCount()+'</span> <span class="muted">connected</span></div>'+
       '<div class="sumbox"><div class="muted small">Questions in this session</div><div class="sumtxt">'+planSummary()+'</div><button class="btn" data-act="hsetup">Choose questions…</button></div>'+
-      '<div class="row"><button class="btn primary big" data-act="hnext"'+(list.length?'':' disabled')+'>'+(q?'Resume':'Start')+' quiz ▶ <span class="small" style="opacity:.8">('+list.length+' questions)</span></button><button class="btn ghost" data-act="hnewroom">New room code</button><button class="btn ghost" data-act="hcopy">Copy link</button></div></div></div></div>';
+      '<div class="row"><button class="btn primary big" data-act="hnext"'+(list.length?'':' disabled')+'>'+(q?'Resume':'Start')+' quiz ▶ <span class="small" style="opacity:.8">('+list.length+' questions)</span></button><button class="btn ghost" data-act="hnewroom">New room code</button><button class="btn ghost" data-act="hcopy">Copy link</button></div><div class="small"><a class="link" href="'+location.pathname+'#stats" target="_blank" rel="noopener">Practice statistics ↗</a></div></div></div></div>';
   } else {
     const idx=list.indexOf(q)+1, rev=H.phase==='r', cs=counts(q), tot=cs.reduce((a,b)=>a+b,0), cor=correctOf(q), ord=optOrder(q,'');
     const opts=ord.map((oi,pos)=>{
@@ -1228,10 +1268,10 @@ function hostPaint(){
       const pct=tot?Math.round(100*cs[oi]/tot):0;
       return '<div class="'+cls+'" style="--pct:'+pct+'%"><span class="k">'+LETTERS[pos]+'</span><span class="t">'+q.opts[oi]+'</span>'+(rev?'<span class="cnt">'+cs[oi]+' · '+pct+'%</span>':'')+'</div>';
     }).join('');
-    let tally=''; if(rev){ const k=cs[cor], w=tot-k, noans=Math.max(0,H.conns.size-tot); tally='<div class="tally"><span class="ok">✓ '+k+' correct'+(tot?' ('+Math.round(100*k/tot)+' %)':'')+'</span><span class="bad">✗ '+w+' wrong'+(tot?' ('+Math.round(100*w/tot)+' %)':'')+'</span>'+(noans?'<span class="no">'+noans+' no answer</span>':'')+'</div>'; }
+    let tally=''; if(rev){ const k=cs[cor], w=tot-k, noans=Math.max(0,presentCount()-tot); tally='<div class="tally"><span class="ok">✓ '+k+' correct'+(tot?' ('+Math.round(100*k/tot)+' %)':'')+'</span><span class="bad">✗ '+w+' wrong'+(tot?' ('+Math.round(100*w/tot)+' %)':'')+'</span>'+(noans?'<span class="no">'+noans+' no answer</span>':'')+'</div>'; }
     const exp = rev && H.ui.exp ? '<div class="feedback" style="margin-top:18px"><div>'+(q.exp||'')+'</div>'+(q.src?'<div class="src">Modelled on: '+esc(q.src)+'</div>':'')+'</div>' : '';
     html='<div class="proj"><div class="ph"><span class="lec">'+esc(lecLabel(q.lec))+'</span><span class="muted">·</span><span>Question '+idx+' / '+list.length+'</span><span class="sp"></span>'+
-      '<span id="hstat" class="status"></span><span class="pill">'+(rev?'Results':'<span data-ha>0</span> answered')+' · <span data-hc>'+H.conns.size+'</span> online</span></div>'+
+      '<span id="hstat" class="status"></span><span class="pill">'+(rev?'Results':'<span data-ha>0</span> answered')+' · <span data-hc>'+presentCount()+'</span> online</span></div>'+
       '<div class="pm'+(q.fig?' hasfig':'')+'"><div><div class="qtext">'+q.q+'</div><div class="opts">'+opts+'</div>'+tally+exp+'</div>'+(q.fig?figHTML(q):'')+'</div>'+
       '<div class="pf"><span class="info">v'+esc(BUILD)+' · Join: <b>'+esc(location.host+location.pathname.replace(/index\.html$/,''))+'</b> · code <b>'+H.code+'</b></span>'+
       '<button class="btn" data-act="hprev" title="← Back">◀</button>'+
@@ -1294,9 +1334,76 @@ function setupHTML(){
 }
 
 /* ====================================================================
+   STATISTICS  (#stats) — reads the anonymous Abacus counters
+   ==================================================================== */
+let STL=null, STATS_VIEW={t:0,v:{}};   // running loader, data currently shown
+function viewStats(){
+  document.title=TITLE+' Quiz · Statistics';
+  const C=LS.get('sbq.stats',{t:0,v:{}}); route.sort=route.sort||'lec';
+  statsPaint(C);
+  if(!STATS_NS) return;
+  if(!STL) statsLoad();
+}
+async function statsLoad(){
+  const me=STL={done:0,total:2+QUESTIONS.length,err:''}, v=Object.assign({}, LS.get('sbq.stats',{v:{}}).v);
+  const get=async key=>{
+    for(let tries=0;tries<6;tries++){
+      try{
+        const r=await fetch(STATS_URL+'/get/'+STATS_NS+'/'+key,{cache:'no-store'});
+        if(r.status===404) return 0;
+        if(r.status===429){ const w=+(r.headers.get('Retry-After')||10); me.err='Waiting for the counting service (rate limit)…'; statsPaintLive(v); await new Promise(z=>setTimeout(z,(w+1)*1000)); me.err=''; continue; }
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        const j=await r.json(); return +j.value||0;
+      }catch(e){ me.err='Counting service not reachable ('+e.message+') — retrying…'; statsPaintLive(v); await new Promise(z=>setTimeout(z,3000)); }
+    }
+    return null;
+  };
+  const pace=()=>new Promise(z=>setTimeout(z,420));        // stay below 30 requests per 10 s
+  const alive=()=>STL===me && route.name==='stats';
+  for(const k of ['visits','sessions']){ if(!alive()) return; v[k]=await get(k); me.done++; await pace(); }
+  for(const q of QUESTIONS){
+    if(!alive()) return;
+    const n=await get('q.'+q.id+'.n'); await pace();
+    v['q.'+q.id+'.n']=n; v['q.'+q.id+'.ok']= n ? await get('q.'+q.id+'.ok') : 0; if(n) await pace();
+    me.done++; if(me.done%5===0) statsPaintLive(v);
+  }
+  if(STL!==me) return;
+  STL=null; const C={t:Date.now(),v}; LS.set('sbq.stats',C); if(route.name==='stats') statsPaint(C);
+}
+function statsPaintLive(v){ if(route.name==='stats') statsPaint({t:STATS_VIEW.t,v}); }
+function statsPaint(C){
+  STATS_VIEW=C; const v=C.v||{}, has=k=>v[k]!=null, val=k=>v[k]||0;
+  const pct=(a,b)=>b?Math.round(100*a/b)+' %':'–';
+  let N=0,K=0; const per={};
+  QUESTIONS.forEach(q=>{ const n=val('q.'+q.id+'.n'), k=Math.min(n,val('q.'+q.id+'.ok')); N+=n; K+=k; const L=per[q.lec]||(per[q.lec]={n:0,k:0}); L.n+=n; L.k+=k; });
+  const tiles=[['Page visits',has('visits')?val('visits'):'…'],['Practice sessions',has('sessions')?val('sessions'):'…'],['Questions answered',N],['Answered correctly',pct(K,N)]]
+    .map(([l,x])=>'<div class="card st-tile"><div class="muted small">'+l+'</div><div class="st-big">'+x+'</div></div>').join('');
+  const bar=(k,n)=>n?'<div class="bar st-bar"><i style="width:'+Math.round(100*k/n)+'%"></i></div>':'';
+  const lecRows=lecNums.map(n=>{ const L=per[n]||{n:0,k:0}; return '<tr><td>'+esc(lecLabel(n))+'</td><td class="num">'+L.n+'</td><td class="num">'+pct(L.k,L.n)+'</td><td>'+bar(L.k,L.n)+'</td></tr>'; }).join('');
+  let qs=QUESTIONS.slice();
+  if(route.sort==='hard') qs.sort((a,b)=>{ const f=q=>{ const n=val('q.'+q.id+'.n'); return n? val('q.'+q.id+'.ok')/n : 2; }; return f(a)-f(b); });
+  if(route.sort==='most') qs.sort((a,b)=>val('q.'+b.id+'.n')-val('q.'+a.id+'.n'));
+  const qRows=qs.map(q=>{ const n=val('q.'+q.id+'.n'), k=Math.min(n,val('q.'+q.id+'.ok')); const loaded=has('q.'+q.id+'.n');
+    return '<tr><td class="mono">'+q.id+'</td><td>'+esc(q.topic)+'</td><td class="num">'+(loaded?n:'…')+'</td><td class="num">'+pct(k,n)+'</td><td>'+bar(k,n)+'</td></tr>'; }).join('');
+  const seg=(val2,label)=>'<button class="seg'+(route.sort===val2?' on':'')+'" data-act="ssort" data-arg="'+val2+'">'+label+'</button>';
+  const status = !STATS_NS ? 'Counting is switched off (STATS_NS is empty).'
+    : STL ? 'Loading… '+STL.done+' / '+STL.total+(STL.err?' · '+esc(STL.err):' · the free counting service allows ~30 requests per 10 s, so this takes about a minute.')
+    : C.t ? 'Updated '+new Date(C.t).toLocaleString()+' · <button class="link" data-act="sreload">Reload</button>' : '';
+  app.innerHTML='<div class="wrap">'+header()+'<h1 style="margin-bottom:6px">Practice statistics</h1><p class="muted small">Anonymous totals from the self-study mode (live sessions are not included; repeat rounds of wrong answers are not counted). '+status+'</p>'+
+    '<div class="st-tiles">'+tiles+'</div>'+
+    '<h2 class="st-h">By lecture</h2><div class="card st-tbl"><table><tr><th>Lecture</th><th class="num">Answers</th><th class="num">Correct</th><th></th></tr>'+lecRows+'</table></div>'+
+    '<div class="row spread st-h"><h2>By question</h2><div class="segs">'+seg('lec','Lecture order')+seg('hard','Lowest % correct first')+seg('most','Most answered')+'</div></div>'+
+    '<div class="card st-tbl"><table><tr><th>ID</th><th>Topic</th><th class="num">Answers</th><th class="num">Correct</th><th></th></tr>'+qRows+'</table></div></div>';
+}
+Object.assign(ACTS,{
+  ssort(v){ route.sort=v; statsPaint(STATS_VIEW); },
+  sreload(){ if(!STL) statsLoad(); statsPaint(STATS_VIEW); },
+});
+
+/* ====================================================================
    START
    ==================================================================== */
-const start=()=>iceReady.then(bootRoute);
+const start=bootRoute;
 if(document.readyState==='loading') window.addEventListener('DOMContentLoaded', start); else start();
 window.addEventListener('popstate', ()=>{ cleanup(); bootRoute(); });
 })();

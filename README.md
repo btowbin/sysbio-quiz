@@ -17,14 +17,20 @@ The page loads KaTeX (math), PeerJS and a QR generator from the jsDelivr CDN, so
 ## Running a live session
 
 1. Open the presenter view on the lecture-hall computer and put it on the projector. You see a QR code, the web address and a 5-letter room code.
-2. Tick the lectures whose questions you want in this session → **Start quiz**.
+2. Click **Choose questions…** to set up the session:
+   * **Lectures** – which lectures the questions come from.
+   * **Random selection** – pick how many (3, 5, 8, … or all); *Draw again* gives a new random set; *Prefer questions not asked yet* skips questions that already have answers from earlier sessions. *Edit by hand* turns the current draw into a manual selection you can adjust.
+   * **Pick questions myself** – tick individual questions (each shows its topic and question text; "all"/"none" per lecture).
+   * **Order** – lecture order or shuffled.
+
+   The lobby shows a one-line summary (e.g. "8 questions · random draw from L2, L3"). The setup is remembered by the browser. → **Start quiz**. You can also change the selection mid-session from the question list (`L` → *Change questions…*); answers already collected are kept.
 3. Each question: students answer (the header counts *answered / online*) → press **Space** (or *Reveal answer*) to show the solution and the correct/wrong tally → **Space** again for the next question.
 4. The room code is remembered by the browser, so the same QR code can stay on your slides for the whole semester. *New room code* creates a fresh one.
 
 Keyboard shortcuts (presenter): `Space`/`→` next step, `←` back, `R` reveal, `E` show/hide explanation, `L` question list (jump to any question, download results as CSV), `Q` big QR code, `F` fullscreen.
 If you reload the presenter page, the session (position and collected answers) is restored and students reconnect automatically. Keep the presenter tab open during the lecture.
 
-**Test it once on the lecture-hall Wi-Fi before the first live lecture.** Peer-to-peer connections can be blocked by campus firewalls (typically when presenter and students are on different networks, e.g. eduroam vs. mobile data). The page already uses PeerJS' public relay as a fallback, but that is shared and best-effort (UDP port 3478 only). For reliable operation add **your own TURN relay** (see below).
+**Test it once on the lecture-hall Wi-Fi before the first live lecture.** Peer-to-peer connections can be blocked by campus firewalls (typically when presenter and students are on different networks, e.g. eduroam vs. mobile data). The page uses a Metered TURN relay (entries in `TURN_SERVERS`) plus PeerJS' public relay as fallback when direct connections fail.
 
 ### Adding a TURN relay
 Near the top of the script (search for `TURN_SERVERS`) there are two settings, use one of them:
@@ -37,6 +43,8 @@ Near the top of the script (search for `TURN_SERVERS`) there are two settings, u
 The relay must be reachable from the students' phones and your laptop; a TURN entry on port 443 over TCP/TLS gets through most strict firewalls.
 
 **Check that it works:** add `?relay` to the addresses to force relay-only connections. Presenter: `https://…/?relay#host`, student: `https://…/?join=CODE&relay`. If the quiz still connects, the relay works.
+
+**Test without any relay:** add `?norelay` instead (presenter: `https://…/?norelay#host`). Then only direct connections are tried — useful to check whether a network (e.g. eduroam in the lecture hall) works without the relay. The QR code shown by the presenter page carries the flag, so students who scan it are in the same test mode; the status line shows "test mode: no relay" / "test mode: relay only". Without either flag (normal use) direct connections are tried first and the relay is only used when they fail.
 
 ## Editing / adding questions
 

@@ -146,6 +146,30 @@ select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);backgroun
 .banner{background:var(--bad-soft);border:1px solid var(--bad);color:var(--bad);padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:600}
 .banner.warn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 
+/* session setup */
+.sumbox{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.sumtxt{font-size:1.05rem}
+.modal.setup{width:min(92vw,900px)}
+.slab{margin:18px 0 8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.segs{display:flex;flex-wrap:wrap;gap:6px}
+.seg{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600}
+.seg.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.link-like{background:none;border:0;padding:0;cursor:pointer;font-weight:600}
+.cb{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:inline-grid;place-items:center;font-weight:800;font-size:.85rem;color:var(--accent-ink)}
+.cb.on,.sq.on .cb{background:var(--accent);border-color:var(--accent)}
+.sqlist{display:grid;gap:6px}
+.sqh{display:flex;gap:10px;align-items:baseline;margin:12px 0 2px}
+.sq{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.sq[data-act]{cursor:pointer}
+.sq[data-act]:hover{border-color:var(--accent)}
+.sq.on[data-act]{border-color:var(--accent);background:var(--accent-soft)}
+.sqm{flex:1;min-width:0}
+.sq .id{font:600 .8rem ui-monospace,monospace;color:var(--muted)}
+.sq .st{margin-left:8px;font-size:.75rem;color:var(--warn);font-weight:700}
+.sqt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.88rem;color:var(--muted);margin-top:2px}
+.sqt p{display:inline;margin:0}
+.sqt .katex-display{display:inline;margin:0}
+
 /* presenter */
 .proj{min-height:100vh;display:flex;flex-direction:column}
 .ph{display:flex;align-items:center;gap:16px;padding:12px 28px;font-size:clamp(14px,1.35vw,22px);border-bottom:1px solid var(--line);background:var(--card)}
@@ -684,7 +708,7 @@ const QUESTIONS = [
 /* ====================================================================
    SETTINGS  (edit here)
    ==================================================================== */
-const BUILD        = '2026-10-27 09:44';                // version stamp (shown at the bottom of the pages)
+const BUILD        = '2026-10-27 10:43';                // version stamp (shown at the bottom of the pages)
 const TITLE        = 'Systems Biology';          // shown in the header
 const PEER_PREFIX  = 'sysbio-quiz-';             // prefix of the room id on the public PeerJS broker
 const ICE_SERVERS  = [                            // STUN servers (add a TURN server here if campus Wi-Fi blocks peer-to-peer)
@@ -707,14 +731,18 @@ const TURN_SERVERS = [
 const TURN_CREDENTIALS_URL = '';
 // Advanced: self-hosted PeerJS server -> define window.SBQ_PEER = {host:'...', port:443, path:'/', secure:true} before this script.
 let ICE_LIVE = ICE_SERVERS.concat(TURN_SERVERS);
+// ?norelay = test mode without any TURN relay (STUN only, direct connections);  ?relay = relay only (tests the TURN server)
+const QS = new URLSearchParams(location.search), NORELAY = QS.has('norelay'), FORCERELAY = QS.has('relay') && !NORELAY;
+const isTurn = s => [].concat(s.urls).some(u => /^turns?:/.test(u));
 const iceReady = (async () => {
-  if(!TURN_CREDENTIALS_URL) return;
+  if(!TURN_CREDENTIALS_URL || NORELAY) return;
   try{ const ctl=new AbortController(), t=setTimeout(()=>ctl.abort(),4000);
        const r=await fetch(TURN_CREDENTIALS_URL,{signal:ctl.signal}); clearTimeout(t); const j=await r.json();
        if(Array.isArray(j)) ICE_LIVE = ICE_SERVERS.concat(TURN_SERVERS, j); }catch(e){}
 })();
 // add ?relay to the address (students: ?join=CODE&relay, presenter: ?relay#host) to force relay-only and thereby test the TURN server
-const peerOpts = () => Object.assign({debug:1, config:{iceServers:ICE_LIVE, iceTransportPolicy:new URLSearchParams(location.search).has('relay')?'relay':'all'}}, window.SBQ_PEER || {});
+const peerOpts = () => Object.assign({debug:1, config:{iceServers:NORELAY ? ICE_SERVERS.filter(s=>!isTurn(s)) : ICE_LIVE, iceTransportPolicy:FORCERELAY?'relay':'all'}}, window.SBQ_PEER || {});
+const relayTag = NORELAY ? ' · test mode: no relay' : FORCERELAY ? ' · test mode: relay only' : '';
 
 /* ====================================================================
    HELPERS
@@ -813,6 +841,7 @@ function header(extra){
 }
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]'); if(!t || t.disabled) return;
+  if(t.classList.contains('overlay') && e.target!==t) return; // clicks inside a modal don't close it
   const act=t.dataset.act, arg=t.dataset.arg;
   const fn = ACTS[act]; if(fn) fn(arg, t, e);
 });
@@ -970,7 +999,7 @@ function studentPaint(full){
   if(st && st.ver!==VER) body+='<div class="banner">Your page is out of date. Please reload it (pull down, or hard-refresh) to see the current question.</div>';
   if(S.err && S.status!=='on') body+='<div class="banner warn">'+esc(S.err)+'</div>';
   if(!st || st.phase==='lobby' || !byId[st.qid]){
-    body+='<div class="card wait"><div class="spin"></div><h2>'+(S.status==='on'?'You’re in!':'Connecting…')+'</h2><p class="muted">'+(S.status==='on'?'Waiting for the lecturer to start the next question…':'Room '+esc(S.code)+'<br>'+(S.stage===2?'Step 2 of 2: contacting the lecturer’s page…':'Step 1 of 2: reaching the connection service…'))+'</p></div>';
+    body+='<div class="card wait"><div class="spin"></div><h2>'+(S.status==='on'?'You’re in!':'Connecting…')+'</h2><p class="muted">'+(S.status==='on'?'Waiting for the lecturer to start the next question…':'Room '+esc(S.code)+esc(relayTag)+'<br>'+(S.stage===2?'Step 2 of 2: contacting the lecturer’s page…':'Step 1 of 2: reaching the connection service…'))+'</p></div>';
   } else {
     const q=byId[st.qid], ord=optOrder(q,''), cor=correctOf(q), mine=st.mine, locked=mine!=null || (S.pendingSince>0);
     const reveal=st.phase==='r';
@@ -1008,15 +1037,42 @@ Object.assign(ACTS,{
 let H=null;
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const genCode = () => Array.from({length:5},()=>CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
-const joinURL = () => location.origin+location.pathname+'?join='+H.code;
+const joinURL = () => location.origin+location.pathname+'?join='+H.code+(NORELAY?'&norelay':FORCERELAY?'&relay':'');
+const bankIdx={}; QUESTIONS.forEach((q,i)=>bankIdx[q.id]=i);
+const N_CHOICES=[3,5,8,10,12,15,20,0];
 function hostLoad(){
   const sv=LS.get('sbq.host',{})||{};
-  H={ code:sv.code||genCode(), sel:sv.sel||lecNums.slice(), cur:sv.cur||null, phase:sv.phase||'lobby', answers:sv.answers||{},
+  const c=Object.assign({sel:sv.sel||lecNums.slice(), mode:'random', n:8, order:'lec', fresh:true, picks:[], drawn:[], seed:Math.random().toString(36).slice(2)}, sv.cfg||{});
+  H={ code:sv.code||genCode(), cfg:c, plan:Array.isArray(sv.plan)?sv.plan.filter(id=>byId[id]):null, cur:sv.cur||null, phase:sv.phase||'lobby', answers:sv.answers||{},
       conns:new Map(), peer:null, status:'connecting', ui:{overlay:null, exp:false}, tries:0, dead:false };
+  if(!H.plan || !H.plan.length) buildPlan(false);
   if(H.phase!=='lobby' && !byId[H.cur]) { H.phase='lobby'; H.cur=null; }
 }
-function hostSave(){ LS.set('sbq.host',{code:H.code, sel:H.sel, cur:H.cur, phase:H.phase, answers:H.answers}); }
-const hostList = () => QUESTIONS.filter(q=>H.sel.includes(q.lec));
+function hostSave(){ LS.set('sbq.host',{code:H.code, cfg:H.cfg, plan:H.plan, cur:H.cur, phase:H.phase, answers:H.answers}); }
+const hostPool = () => QUESTIONS.filter(q=>H.cfg.sel.includes(q.lec));
+const asked = id => !!(H.answers[id] && Object.keys(H.answers[id]).length);
+/* Session plan = ordered list of question ids.  random: draw n from the selected lectures (unasked first if cfg.fresh);
+   pick: the ticked questions.  order: 'lec' = order of the question bank, 'shuffle' = stable random order (cfg.seed). */
+function buildPlan(redraw){
+  const c=H.cfg, pool=hostPool().map(q=>q.id); let ids;
+  if(c.mode==='pick'){ ids=c.picks.filter(id=>byId[id]&&pool.includes(id)); }
+  else {
+    const n=c.n?Math.min(c.n,pool.length):pool.length;
+    const ok=!redraw && c.drawn.length===n && c.drawn.every(id=>pool.includes(id));
+    if(!ok){
+      const fresh=shuffled(pool.filter(id=>!(c.fresh&&asked(id))),Math.random), old=shuffled(pool.filter(id=>c.fresh&&asked(id)),Math.random);
+      c.drawn=fresh.concat(old).slice(0,n);
+    }
+    ids=c.drawn.slice();
+  }
+  ids.sort((a,b)=>bankIdx[a]-bankIdx[b]);
+  if(c.order==='shuffle') ids.sort((a,b)=>hashStr(c.seed+a)-hashStr(c.seed+b));
+  H.plan=ids;
+  if(H.phase==='lobby') H.cur=null;
+  else if(H.cur && !ids.includes(H.cur)){ /* current question dropped from the plan: keep showing it, navigation continues from the plan start */ }
+}
+function planChanged(redraw){ buildPlan(redraw); hostSave(); if(H.phase!=='lobby') broadcast(); hostPaint(); }
+const hostList = () => H.plan.map(id=>byId[id]).filter(Boolean);
 const hostQ = () => H.cur ? byId[H.cur] : null;
 function counts(q){ const a=H.answers[q.id]||{}, c=q.opts.map(()=>0); Object.values(a).forEach(v=>{ if(c[v]!=null) c[v]++; }); return c; }
 function viewHost(){
@@ -1083,7 +1139,7 @@ function hostStatus(){
   else if(s==='busy'){ txt='Room code still held by a previous page — retrying…'; cls='wait'; }
   else if(s==='error:lib'){ txt='Connection library not loaded (offline?)'; cls='off'; }
   else { txt='Connection problem ('+s.replace('error:','')+') — retrying…'; cls='off'; }
-  el.innerHTML='<i class="dot '+cls+'"></i> '+txt;
+  el.innerHTML='<i class="dot '+cls+'"></i> '+txt+esc(relayTag);
 }
 function setPhase(ph,id){
   H.phase=ph; if(id!==undefined) H.cur=id;
@@ -1104,7 +1160,7 @@ function hostBack(){
 function hostKey(e){
   if(!H||e.ctrlKey||e.metaKey||e.altKey) return; const k=e.key;
   if(H.ui.overlay && k==='Escape'){ H.ui.overlay=null; hostPaint(); return; }
-  if(H.phase==='lobby') { if(k==='Enter'){ hostAdvance(); } return; }
+  if(H.phase==='lobby') { if(k==='Enter'&&!H.ui.overlay&&!/^(SELECT|INPUT|BUTTON)$/.test((e.target||{}).tagName||'')){ hostAdvance(); } return; }
   if(k===' '||k==='ArrowRight'||k==='Enter'||k==='PageDown'){ e.preventDefault(); if(!H.ui.overlay) hostAdvance(); }
   else if(k==='ArrowLeft'||k==='PageUp'){ e.preventDefault(); if(!H.ui.overlay) hostBack(); }
   else if(k==='r'||k==='R'){ if(H.phase==='q') setPhase('r'); }
@@ -1121,7 +1177,19 @@ Object.assign(ACTS,{
   hclose(){ H.ui.overlay=null; hostPaint(); },
   hfull(){ try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){} },
   hjump(id){ H.ui.overlay=null; setPhase('q',id); },
-  hchip(n){ n=+n; const i=H.sel.indexOf(n); if(i>=0) H.sel.splice(i,1); else H.sel.push(n); H.sel.sort((a,b)=>a-b); hostSave(); hostPaint(); },
+  hchip(n){ n=+n; const s=H.cfg.sel, i=s.indexOf(n); if(i>=0) s.splice(i,1); else s.push(n); s.sort((a,b)=>a-b); planChanged(true); },
+  hsetup(){ H.ui.overlay='setup'; hostPaint(); },
+  hmode(m){ H.cfg.mode=m; planChanged(false); },
+  hn(v){ H.cfg.n=+v; planChanged(true); },
+  horder(v){ H.cfg.order=v; if(v==='shuffle') H.cfg.seed=Math.random().toString(36).slice(2); planChanged(false); },
+  hfresh(){ H.cfg.fresh=!H.cfg.fresh; planChanged(true); },
+  hdraw(){ if(H.cfg.order==='shuffle') H.cfg.seed=Math.random().toString(36).slice(2); planChanged(true); },
+  hpick(id){ const p=H.cfg.picks, i=p.indexOf(id); if(i>=0) p.splice(i,1); else p.push(id); planChanged(false); },
+  hpickall(n){ n=+n; const ids=QUESTIONS.filter(q=>q.lec===n).map(q=>q.id), p=H.cfg.picks, all=ids.every(id=>p.includes(id));
+    H.cfg.picks = all ? p.filter(id=>!ids.includes(id)) : p.concat(ids.filter(id=>!p.includes(id))); planChanged(false); },
+  hpicknone(){ H.cfg.picks=[]; planChanged(false); },
+  htopick(){ H.cfg.picks=H.plan.slice(); H.cfg.mode='pick'; planChanged(false); },
+  hsetupdone(){ H.ui.overlay=null; hostPaint(); },
   hlobby(){ H.ui.overlay=null; setPhase('lobby'); },
   hnewroom(){ if(!confirm('Create a new room code? Students currently connected will have to rejoin, and collected answers are cleared.')) return; H.code=genCode(); H.answers={}; H.cur=null; H.phase='lobby'; hostSave(); hostOpenPeer(); hostPaint(); },
   hreset(){ if(!confirm('Clear all collected answers of this session?')) return; H.answers={}; hostSave(); broadcast(); hostPaint(); },
@@ -1147,12 +1215,11 @@ function hostPaint(){
   const fileWarn = location.protocol==='file:' ? '<div class="banner" style="margin:0 0 12px">This page was opened from a local file. Students cannot reach it — publish it (e.g. GitHub Pages) and open that address, otherwise the QR code will not work.</div>' : '';
   let html='';
   if(H.phase==='lobby' || !q){
-    const chips=lecNums.map(n=>{ const c=QUESTIONS.filter(x=>x.lec===n).length; if(!c) return ''; return '<button class="chip'+(H.sel.includes(n)?' on':'')+'" data-act="hchip" data-arg="'+n+'"><b>'+esc(lecLabel(n))+'</b><span>'+c+' questions</span></button>'; }).join('');
     html='<div class="proj"><div class="ph"><span class="brand" data-act="home" style="font-size:1em">'+esc(TITLE)+' · Live quiz</span><span class="sp"></span><span id="hstat" class="status"></span><button class="btn ghost" data-act="theme" aria-label="Toggle theme">'+THEME_ICON+'</button></div>'+
       '<div class="lobby"><div>'+fileWarn+'<div class="qrbox">'+qrSvg(url)+'</div></div>'+
       '<div class="stack" style="min-width:0"><div class="muted">Scan the QR code, or go to</div><div class="joinurl">'+esc(location.host+location.pathname.replace(/index\.html$/,''))+'</div><div class="muted">and enter the code</div><div class="code">'+H.code+'</div>'+
       '<div><span class="bigcount" data-hc>'+H.conns.size+'</span> <span class="muted">connected</span></div>'+
-      '<div><div class="muted small" style="margin-bottom:8px">Questions to ask in this session</div><div class="chips">'+chips+'</div></div>'+
+      '<div class="sumbox"><div class="muted small">Questions in this session</div><div class="sumtxt">'+planSummary()+'</div><button class="btn" data-act="hsetup">Choose questions…</button></div>'+
       '<div class="row"><button class="btn primary big" data-act="hnext"'+(list.length?'':' disabled')+'>'+(q?'Resume':'Start')+' quiz ▶ <span class="small" style="opacity:.8">('+list.length+' questions)</span></button><button class="btn ghost" data-act="hnewroom">New room code</button><button class="btn ghost" data-act="hcopy">Copy link</button></div></div></div></div>';
   } else {
     const idx=list.indexOf(q)+1, rev=H.phase==='r', cs=counts(q), tot=cs.reduce((a,b)=>a+b,0), cor=correctOf(q), ord=optOrder(q,'');
@@ -1174,15 +1241,56 @@ function hostPaint(){
   }
   // overlays
   if(H.ui.overlay==='qr'){
-    html+='<div class="overlay" data-act="hclose"><div class="modal" style="text-align:center" onclick="event.stopPropagation()"><div class="qrbox">'+qrSvg(url)+'</div><div class="code" style="margin-top:14px">'+H.code+'</div><div class="joinurl" style="margin-top:8px">'+esc(url)+'</div></div></div>';
+    html+='<div class="overlay" data-act="hclose"><div class="modal" style="text-align:center"><div class="qrbox">'+qrSvg(url)+'</div><div class="code" style="margin-top:14px">'+H.code+'</div><div class="joinurl" style="margin-top:8px">'+esc(url)+'</div></div></div>';
+  } else if(H.ui.overlay==='setup'){
+    html+='<div class="overlay" data-act="hsetupdone"><div class="modal setup">'+setupHTML()+'</div></div>';
   } else if(H.ui.overlay==='list'){
     const cur=hostQ();
     const items=list.map(x=>{ const a=H.answers[x.id], n=a?Object.keys(a).length:0; let st=''; if(n){ const c=counts(x); st=Math.round(100*c[correctOf(x)]/n)+' % of '+n; }
       return '<button class="qli'+(cur&&cur.id===x.id?' cur':'')+'" data-act="hjump" data-arg="'+x.id+'"><span class="id">'+x.id+'</span><span class="tp">'+esc(x.topic)+'</span><span class="st">'+st+'</span></button>'; }).join('');
-    const chips=lecNums.map(n=>{ const c=QUESTIONS.filter(x=>x.lec===n).length; return c?'<button class="chip'+(H.sel.includes(n)?' on':'')+'" style="min-width:0;flex:0 1 auto;padding:6px 10px" data-act="hchip" data-arg="'+n+'"><b>'+(n===7?'More':'L'+n)+'</b></button>':''; }).join('');
-    html+='<div class="overlay" data-act="hclose"><div class="modal" onclick="event.stopPropagation()"><div class="row spread" style="margin-bottom:12px"><h2>Questions</h2><div class="row"><button class="btn" data-act="hcsv">Download results (CSV)</button><button class="btn" data-act="hlobby">Lobby / QR</button><button class="btn primary" data-act="hclose">Close</button></div></div><div class="chips" style="margin-bottom:12px">'+chips+'</div><div class="qlist">'+items+'</div><p class="muted small" style="margin-top:14px"><button class="link" data-act="hreset">Clear collected answers</button></p></div></div>';
+    html+='<div class="overlay" data-act="hclose"><div class="modal"><div class="row spread" style="margin-bottom:12px"><h2>Questions</h2><div class="row"><button class="btn" data-act="hcsv">Download results (CSV)</button><button class="btn" data-act="hlobby">Lobby / QR</button><button class="btn primary" data-act="hclose">Close</button></div></div><div class="row" style="margin-bottom:12px"><span class="muted small">'+planSummary()+'</span><button class="btn" data-act="hsetup">Change questions…</button></div><div class="qlist">'+items+'</div><p class="muted small" style="margin-top:14px"><button class="link" data-act="hreset">Clear collected answers</button></p></div></div>';
   }
+  const oldM=app.querySelector('.modal'), keep=oldM?oldM.scrollTop:0;
   app.innerHTML=html; hostStatus(); hostCount(); typeset(app);
+  const newM=app.querySelector('.modal'); if(newM&&keep) newM.scrollTop=keep;
+}
+const lecShort = n => n===7 ? 'More topics' : 'L'+n;
+function planSummary(){
+  const c=H.cfg, n=H.plan.length, lecs=[...new Set(hostList().map(q=>q.lec))].sort((a,b)=>a-b).map(lecShort).join(', ');
+  if(!n) return '<b>No questions selected</b>';
+  return '<b>'+n+' question'+(n>1?'s':'')+'</b> · '+(c.mode==='pick'?'chosen by hand':'random draw')+(lecs?' from '+esc(lecs):'')+(c.order==='shuffle'?' · shuffled order':'');
+}
+function qStat(id){ const a=H.answers[id], n=a?Object.keys(a).length:0; if(!n) return ''; const q=byId[id], k=counts(q)[correctOf(q)]; return '<span class="st" title="asked before">asked · '+Math.round(100*k/n)+' % of '+n+'</span>'; }
+function setupRow(q, on, act){
+  return '<button class="sq'+(on?' on':'')+'"'+(act?' data-act="hpick" data-arg="'+q.id+'"':'')+'>'+(act?'<span class="cb">'+(on?'✓':'')+'</span>':'')+
+    '<span class="sqm"><span class="id">'+q.id+'</span> <b>'+esc(q.topic)+'</b>'+qStat(q.id)+'<span class="sqt">'+q.q+'</span></span></button>';
+}
+function setupHTML(){
+  const c=H.cfg, pool=hostPool();
+  const seg=(act,val,cur,label)=>'<button class="seg'+(String(val)===String(cur)?' on':'')+'" data-act="'+act+'" data-arg="'+val+'">'+label+'</button>';
+  const chips=lecNums.map(n=>{ const k=QUESTIONS.filter(x=>x.lec===n).length; if(!k) return ''; return '<button class="chip'+(c.sel.includes(n)?' on':'')+'" data-act="hchip" data-arg="'+n+'"><b>'+esc(lecLabel(n))+'</b><span>'+k+' questions</span></button>'; }).join('');
+  let h='<div class="row spread" style="margin-bottom:14px"><h2>Choose questions</h2><button class="btn primary" data-act="hsetupdone">Done</button></div>'+
+    '<div class="muted small slab">1 · Lectures</div><div class="chips">'+chips+'</div>'+
+    '<div class="muted small slab">2 · How to choose</div><div class="segs">'+seg('hmode','random',c.mode,'Random selection')+seg('hmode','pick',c.mode,'Pick questions myself')+'</div>';
+  if(c.mode==='random'){
+    h+='<div class="muted small slab">3 · Number of questions</div><div class="segs">'+N_CHOICES.map(v=>seg('hn',v,c.n,v?String(v):'All ('+pool.length+')')).join('')+'</div>'+
+      '<div class="row" style="margin-top:12px"><button class="toggle link-like" data-act="hfresh"><span class="cb'+(c.fresh?' on':'')+'">'+(c.fresh?'✓':'')+'</span>Prefer questions not asked yet</button></div>';
+  }
+  h+='<div class="muted small slab">'+(c.mode==='random'?'4':'3')+' · Order</div><div class="segs">'+seg('horder','lec',c.order,'Lecture order')+seg('horder','shuffle',c.order,'Shuffled')+'</div>';
+  if(c.mode==='random'){
+    h+='<div class="row spread slab"><span><b>'+H.plan.length+'</b> drawn questions</span><span class="row"><button class="btn" data-act="hdraw">↻ Draw again</button><button class="btn ghost" data-act="htopick" title="Switch to manual selection, starting from this draw">Edit by hand</button></span></div>'+
+      '<div class="sqlist">'+(hostList().map(q=>setupRow(q,true,false)).join('')||'<p class="muted">Select at least one lecture.</p>')+'</div>';
+  } else {
+    h+='<div class="row spread slab"><span><b>'+H.plan.length+'</b> selected</span><button class="btn ghost" data-act="hpicknone">Clear selection</button></div><div class="sqlist">';
+    lecNums.filter(n=>c.sel.includes(n)).forEach(n=>{ const qs=pool.filter(q=>q.lec===n); if(!qs.length) return;
+      const k=qs.filter(q=>c.picks.includes(q.id)).length;
+      h+='<div class="sqh"><b>'+esc(lecLabel(n))+'</b><span class="muted small">'+k+' / '+qs.length+'</span><button class="link" data-act="hpickall" data-arg="'+n+'">'+(k===qs.length?'none':'all')+'</button></div>'+
+        qs.map(q=>setupRow(q,c.picks.includes(q.id),true)).join('');
+    });
+    h+=(pool.length?'':'<p class="muted">Select at least one lecture.</p>')+'</div>';
+  }
+  if(H.phase!=='lobby') h+='<p class="muted small" style="margin-top:12px">The session is running — changes apply to the remaining questions; collected answers are kept.</p>';
+  return h;
 }
 
 /* ====================================================================

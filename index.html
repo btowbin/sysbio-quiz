@@ -66,8 +66,8 @@ button,input,select{font:inherit;color:inherit}
 .brand{white-space:nowrap;font-weight:800;letter-spacing:-.01em;font-size:1.15rem;display:flex;gap:10px;align-items:center;cursor:pointer}
 .logo{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
 .logo svg{width:20px;height:20px}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:700}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block}
+.pill{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:700}
+.dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block}
 .dot.on{background:var(--ok)} .dot.wait{background:var(--warn)} .dot.off{background:var(--bad)}
 
 /* home */
@@ -97,6 +97,7 @@ button,input,select{font:inherit;color:inherit}
 .fig svg{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:10px}
 .fig.net{max-width:440px}
 .figs{display:grid;gap:10px}
+.figs>.fig{width:100%}
 .opts{display:grid;gap:10px;margin:18px 0 0}
 .opt{position:relative;overflow:hidden;display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--card);cursor:pointer;line-height:1.45;transition:border-color .12s,background .12s}
 .opt:hover:not([disabled]){border-color:var(--accent)}
@@ -142,8 +143,8 @@ select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);backgroun
 /* student live */
 .live{max-width:640px}
 .status{font-size:.82rem;color:var(--muted);display:flex;gap:6px;align-items:center}
-.wait{text-align:center;padding:48px 12px}
-.wait .spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--accent);margin:0 auto 16px;animation:sp 1s linear infinite}
+.card.wait{text-align:center;padding:48px 12px}
+.card.wait .spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--accent);margin:0 auto 16px;animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .banner{background:var(--bad-soft);border:1px solid var(--bad);color:var(--bad);padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:600}
 .banner.warn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
@@ -199,13 +200,15 @@ select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);backgroun
 .ph .lec{font-weight:700}
 .ph .sp{flex:1}
 .pm{flex:1;display:grid;gap:32px;padding:18px 28px 16px;align-content:start;grid-template-columns:1fr}
-.pm.hasfig{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.pm.hasfig{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
 @media (max-width:900px){.pm.hasfig{grid-template-columns:1fr}}
 .pm .qtext{font-size:clamp(20px,2.3vw,42px);line-height:1.35}
 .pm .opts{gap:clamp(8px,1vw,16px)}
 .pm .opt{font-size:clamp(16px,1.85vw,34px);padding:clamp(6px,.8vw,16px) clamp(12px,1.4vw,24px);cursor:default;border-width:3px}
 .pm .opt .k{width:1.5em;height:1.5em;font-size:.8em;border-radius:.4em}
-.pm .fig{max-width:none;margin-top:0;position:sticky;top:16px}
+.pm .fig{max-width:none;width:100%;margin:0;position:sticky;top:16px}
+.pm .fig svg{max-height:calc(100vh - 190px)}
+.pm .figs .fig svg{max-height:calc((100vh - 200px)/2)}
 .pm .figs{position:sticky;top:16px;align-content:start} .pm .figs .fig{position:static} .pm .fig.net{max-width:none}
 .pm .feedback{font-size:clamp(16px,1.6vw,28px)}
 .pf{position:sticky;bottom:0;z-index:5;display:flex;gap:10px;align-items:center;padding:10px 28px;border-top:1px solid var(--line);background:var(--card);flex-wrap:wrap}
@@ -776,7 +779,7 @@ const QUESTIONS = [
 /* ====================================================================
    SETTINGS  (edit here)
    ==================================================================== */
-const BUILD        = '2026-10-27 19:57';                // version stamp (shown at the bottom of the pages)
+const BUILD        = '2026-10-27 20:08';                // version stamp (shown at the bottom of the pages)
 const TITLE        = 'Systems Biology';          // shown in the header
 // LIVE MODE TRANSPORT: messages travel through free public MQTT brokers (MQTT over secure WebSocket, no account needed).
 // The presenter page connects to ALL brokers in the list; each student uses the first one that works.
@@ -1389,7 +1392,7 @@ function hostPaint(){
     let tally=''; if(!rev){ tally='<div class="anscount"><span>Answers received:</span><span class="anum" data-ha>'+tot+'</span><span class="muted">of <span data-hc>'+presentCount()+'</span> online</span></div>'; }
     else { const k=cs[cor], w=tot-k, noans=Math.max(0,presentCount()-tot); tally='<div class="tally"><span>'+tot+' answer'+(tot===1?'':'s')+':</span><span class="ok">✓ '+k+' correct'+(tot?' ('+Math.round(100*k/tot)+' %)':'')+'</span><span class="bad">✗ '+w+' wrong'+(tot?' ('+Math.round(100*w/tot)+' %)':'')+'</span>'+(noans?'<span class="no">'+noans+' no answer</span>':'')+'</div>'; }
     const exp = rev && H.ui.exp ? '<div class="feedback" style="margin-top:18px"><div>'+(q.exp||'')+'</div>'+(q.src?'<div class="src">Modelled on: '+esc(q.src)+'</div>':'')+'</div>' : '';
-    html='<div class="proj"><div class="ph"><span class="lec">'+esc(lecLabel(q.lec))+'</span><span class="muted">·</span><span>Question '+idx+' / '+list.length+'</span>'+diffTag(q)+'<span class="sp"></span>'+
+    html='<div class="proj"><div class="ph"><span class="lec">'+esc(lecLabel(q.lec))+'</span><span class="muted">·</span><span style="white-space:nowrap">Question '+idx+' / '+list.length+'</span>'+diffTag(q)+'<span class="sp"></span>'+
       '<span id="hstat" class="status"></span><span class="pill">'+(rev?'Results':'<span data-ha>0</span> answered')+' · <span data-hc>'+presentCount()+'</span> online</span></div>'+
       '<div class="pm'+(q.fig?' hasfig':'')+'"><div><div class="qtext">'+q.q+'</div><div class="opts">'+opts+'</div>'+tally+exp+'</div>'+(q.fig?figHTML(q):'')+'</div>'+
       '<div class="pf"><span class="info">v'+esc(BUILD)+' · Join: <b>'+esc(location.host+location.pathname.replace(/index\.html$/,''))+'</b> · code <b>'+H.code+'</b></span>'+
